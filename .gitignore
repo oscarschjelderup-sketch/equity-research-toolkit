@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Office lock files
+~$*
+
+# Build intermediates (the finished workbooks are committed at the root and in examples/)
+model_builder/*_raw.xlsx
+model_builder/model_final.xlsx
+model_builder/sats_final.xlsx
+model_builder/whatif_runs.json
+/Equity_Research_Pitch_Generated.pptx
+/Equity_Research_Chart_Library_Generated.pptx
+
+# Kept out of the repository on purpose
+# - the competition's branded template and everything built on it
+/Equity_Research_Pitch_Template.*
+/Equity_Research_Chart_Library.pdf
+/Equity_Research_Chart_Library.pptx
+/SATS/
+# - names and photos of real team members (deck_builder/team/team.json + photos)
+deck_builder/team/
+# - old versions
+/Arkiv/

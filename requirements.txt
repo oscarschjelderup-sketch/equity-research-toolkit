@@ -1,0 +1,8 @@
+# Build the workbook layout and the decks (any OS)
+openpyxl>=3.1
+python-pptx>=1.0
+lxml>=4.9
+# Finalise, verify and stress-test the workbook in Excel (Windows only)
+pywin32>=306; sys_platform == "win32"
+# Tests
+pytest>=8
