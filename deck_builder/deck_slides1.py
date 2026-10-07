@@ -23,7 +23,7 @@ def std(prs, chapter, title, subtitle, footnote):
 def cover(prs, d):
     s = new_slide(prs, "Title slide - blue", ph_text={
         0: ct("cover_title", f"{d.c('Inputs', 'company')} – Compounding quality at a discount"),
-        1: "Pareto Equity Research Competition 2026",
+        1: ct("cover_sub", "Pareto Equity Research Competition 2026"),
         12: ct("cover_dates", "[Case dates, e.g. 09 – 12.02.26]")})
     notes(s, "TEMPLATE: Replace the title with your own equity story in 4-6 words (e.g. 'SATS – Healthy body, healthy "
              "margins'). Keep the competition name. Update the date line.\n\n"
@@ -37,6 +37,8 @@ def _load_team():
     """Team members from team/team.json – [[name, photo file or null, [line, ...]], ...]. The team folder is kept out of
     version control (names and photos of real people); without it the slide shows placeholders."""
     try:
+        if os.environ.get("EQR_TEAM", "").lower() == "none":       # build with placeholders even if team.json exists
+            raise OSError
         with open(os.path.join(TEAM_DIR, "team.json"), encoding="utf8") as f:
             return [tuple(m) for m in json.load(f)]
     except (OSError, ValueError):

@@ -55,7 +55,7 @@ def test_deck_builder_uses_the_same_map():
 
 @pytest.mark.parametrize("xlsx, committed_map, dcf, tp", [
     (EXAMPLE_XLSX, "model_map.json", 139.11, 146),
-    (SATS_XLSX, "model_map_sats.json", 54.26, 57),
+    (SATS_XLSX, "model_map_sats.json", 50.71, 54),
 ])
 def test_committed_workbooks_pass_their_checks(xlsx, committed_map, dcf, tp):
     cells = json.loads((MB / committed_map).read_text(encoding="utf8"))["cells"]
@@ -77,12 +77,14 @@ def test_example_deck(tmp_path):
 
 
 def test_sats_decks(tmp_path):
-    full, short = tmp_path / "full.pptx", tmp_path / "submission.pptx"
+    full, short, review = tmp_path / "full.pptx", tmp_path / "submission.pptx", tmp_path / "review.pptx"
     common = ["--template", "none", "--model", SATS_XLSX, "--map", MB / "model_map_sats.json"]
-    run(["build_deck.py", *common, "--out", full], DB, EQR_CASE="sats_data")
-    run(["build_deck.py", *common, "--main-only", "--out", short], DB, EQR_CASE="sats_data")
-    assert slides(full) == 16
+    run(["build_deck.py", *common, "--out", full], DB, EQR_CASE="sats_data", EQR_TEAM="none")
+    run(["build_deck.py", *common, "--main-only", "--out", short], DB, EQR_CASE="sats_data", EQR_TEAM="none")
+    run(["build_deck.py", *common, "--review", "--out", review], DB, EQR_CASE="sats_data")
+    assert slides(full) == 19          # four content slides plus a twelve-slide appendix
     assert slides(short) == 6          # Pareto rule: four content slides plus cover and team
+    assert slides(review) == 18        # review edition: no team slide
 
 
 def test_chart_library(tmp_path):

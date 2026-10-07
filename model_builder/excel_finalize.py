@@ -92,4 +92,23 @@ try:
     wb.Close(False)
 finally:
     xl.Quit()
+
+
+def strip_local_path(path):
+    """Excel stores the folder the file was saved in (x15ac:absPath) – remove it so a shared workbook reveals no local path."""
+    import re
+    import shutil
+    import zipfile
+    tmp = path + ".tmp"
+    with zipfile.ZipFile(path) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zout:
+        for item in zin.infolist():
+            data = zin.read(item.filename)
+            if item.filename == "xl/workbook.xml":
+                data = re.sub(rb"<mc:AlternateContent[^>]*><mc:Choice Requires=\"x15\"><x15ac:absPath[^>]*/></mc:Choice></mc:AlternateContent>",
+                              b"", data)
+            zout.writestr(item, data)
+    shutil.move(tmp, path)
+
+
+strip_local_path(dst)
 print("saved", dst)

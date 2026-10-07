@@ -25,27 +25,32 @@ where every assumption is visible, sourced and stress-tested.
 
 ## The SATS ASA case
 
-| As of 30 September 2026, share price NOK 42.30 | |
+| As of 6 October 2026, share price NOK 39.75 | |
 |---|---|
-| Recommendation | **BUY**, 12-month target price **NOK 57** (+35%, 38% total return) |
-| DCF value per share / blended fair value | NOK 54.3 / NOK 53.6 (70% DCF, 30% peer multiples) |
-| Bear / base / bull (DCF) | NOK 15 / 54 / 92, probability-weighted 54 |
-| What the share price implies | an EBIT margin (pre-IFRS 16) of 12.7% in 2033 – we model 15.6%, SATS earned 11.7% in 2025 |
-| WACC / terminal growth | 9.0% / 2.0%, terminal value 66% of EV |
+| Recommendation | **BUY**, 12-month target price **NOK 54** (+36%, 39% total return) |
+| DCF value per share / blended fair value | NOK 50.7 / NOK 50.5 (70% DCF, 30% peer multiples) |
+| Bear / base / bull (DCF) | NOK 28 / 51 / 74, probability-weighted 51 |
+| What the share price implies | an EBIT margin (pre-IFRS 16) of 12.3% in 2033 – we model 15.1%, SATS earned 11.7% in 2025 |
+| WACC / terminal growth | 9.1% / 2.0%, terminal value 66% of EV |
 
 The thesis is operating leverage: about 70% of personnel costs and 60% of other operating costs are fixed per club and
 rent is indexed per club, so price increases and fuller clubs lift the margin. The market prices in little of it.
-The [red-team notes](#what-would-make-the-case-wrong) below list where the case is weakest.
+Every operating assumption sits at or below the company's own framework from its 2025 Capital Markets Day (7-8 openings
+a year against a target of 8-12, NOK 9m per club against guidance of 7-8m, buybacks to 1.25x leverage against a
+1.5-2.0x target range). The [red-team notes](#what-would-make-the-case-wrong) below list where the case is weakest.
 
 | | |
 |---|---|
 | ![Company overview](docs/img/sats_slide_03.png) | ![Market overview](docs/img/sats_slide_04.png) |
 | ![Financials and estimates](docs/img/sats_slide_05.png) | ![What the market is pricing in](docs/img/sats_slide_09.png) |
 | ![Scenario analysis](docs/img/sats_slide_10.png) | ![Thesis tracker and kill criteria](docs/img/sats_slide_11.png) |
-| ![Growth engine](docs/img/sats_slide_13.png) | ![Peer group](docs/img/sats_slide_14.png) |
+| ![Growth engine](docs/img/sats_slide_13.png) | ![Club economics – company guidance vs. the model](docs/img/sats_slide_14.png) |
+| ![From revenue growth to cash and shareholder returns](docs/img/sats_slide_15.png) | ![Peer group](docs/img/sats_slide_16.png) |
+| ![Competitive landscape and macro backdrop](docs/img/sats_slide_18.png) | |
 
-Files in [`examples/SATS`](examples/SATS): the workbook, the full 16-slide deck (four content slides plus a nine-slide
-appendix for Q&A) and the six-slide submission version. *A case exercise, not investment advice.*
+Files in [`examples/SATS`](examples/SATS): the workbook, the full 19-slide deck (four content slides plus a twelve-slide
+appendix for Q&A) and the six-slide submission version. `build_deck.py --review` builds the same deck without the team
+slide and with a neutral cover for readers outside the competition. *A case exercise, not investment advice.*
 
 ## The workbook
 
@@ -103,12 +108,16 @@ Choices that matter:
 A red-team pass on our own BUY, with the model's answers:
 
 - **The BUY is a bet on prices outrunning costs.** Price growth 0.5pp lower and cost inflation 0.5pp higher every year
-  give NOK 38 – a HOLD. Price growth 1pp lower alone gives NOK 35, a SELL. Price/mix below 1.5% is kill criterion #1.
-- **Personnel costs have moved the wrong way** – from 35.4% of revenue in 2023 to 37.3% in 2025. We assume 35.2% by 2033.
-- **The bear case is steep (NOK 15).** It stacks every negative in every year; operating leverage cuts both ways.
-- **Near term we are in line with consensus**, not above it (2026E EPS 2.95 vs 2.94). The difference is the margin after
-  2027 – exactly what the reverse DCF isolates.
-- **One warning is left on purpose**: the return on new capital in the forecast (79%) is far above the terminal 25%,
+  give NOK 35 – a SELL. Price growth 1pp lower alone gives NOK 32. Price/mix below 1.5% is kill criterion #1.
+- **Personnel costs have moved the wrong way** – from 35.4% of revenue in 2023 to 37.3% in 2025. We assume 36.9% in 2026
+  falling to 35.5% by 2033; if the 2025 ratio persisted the DCF would be NOK 44 (−6), still a BUY. The assumptions slide
+  shows this what-if next to the drivers.
+- **The bear case is one story (NOK 28, −30%):** low-cost chains cap price increases at ~2% while wages grow ~4%, so the
+  operating leverage runs in reverse and the EBIT margin falls to 9.5% by 2033. The bull case (NOK 74) is the company's
+  own Capital Markets Day ambition delivered.
+- **Near term we are at or below consensus** (2026E EPS 2.87 vs 2.90, 2027E 3.31 vs 3.51 – fewer openings and a more
+  cautious Sweden than the street). The difference is the margin after 2027 – exactly what the reverse DCF isolates.
+- **One warning is left on purpose**: the return on new capital in the forecast (75%) is far above the terminal 25%,
   because most growth comes from price and utilisation of existing clubs, which needs no capital, and members prepay.
 
 ## Quick start
@@ -121,7 +130,7 @@ cd deck_builder
 python build_deck.py --template none --out ../my_deck.pptx               # fictional Example Company ASA
 EQR_CASE=sats_data python build_deck.py --template none \
     --model ../examples/SATS/SATS_ASA_DCF_Model.xlsx --map ../model_builder/model_map_sats.json \
-    --out ../my_sats_deck.pptx                                           # add --main-only for the 4-slide version
+    --out ../my_sats_deck.pptx                                           # --main-only: 4-slide version; --review: no team slide
 EQR_TEMPLATE=none python build_chartlib.py ../my_chart_library.pptx      # 23-slide chart and framework library
 ```
 
@@ -154,8 +163,9 @@ build if a balance sheet does not balance or a cash flow does not tie. Company-s
 Equity_Research_DCF_Toolkit.xlsx   the workbook for the fictional Example Company ASA – the template
 model_builder/                     builds the workbook: layout, formulas, checks; verify, stress test, what-ifs
   example_data.py, sats_data.py    case data (Example Company; SATS ASA from company reports)
+  whatif_runs_sats.json            the SATS what-if results (read by the deck's assumptions slide)
 deck_builder/                      builds the pitch deck and the chart library from a saved workbook
-  sats_deck.py                     SATS-specific slide text
+  sats_deck.py                     SATS-specific slide text, incl. the club-economics and competition slides
 examples/SATS/                     SATS workbook, full deck and submission deck (pptx and pdf)
 examples/example_company/          example deck and the chart library (pptx and pdf)
 tests/                             runs anywhere, no Excel needed
@@ -163,7 +173,8 @@ tests/                             runs anywhere, no Excel needed
 
 ## Data
 
-SATS figures come from the company's published quarterly reports (Q4 2019 to Q2 2026), each line sourced in
-`sats_data.py`; share prices, consensus estimates and peer data from Yahoo Finance; the size of the Nordic fitness market
-from EuropeActive/Deloitte as quoted in the 2026 case workbook. No broker research, paid databases, the competition's
-branded template or the case team's names and photos are included. Code under the MIT licence.
+SATS figures come from the company's published quarterly reports and presentations (Q4 2019 to Q2 2026) and its 2025
+Capital Markets Day, each line sourced in `sats_data.py`; share prices, consensus estimates and peer data from Yahoo
+Finance; macro from Norges Bank, the Riksbank and Konjunkturinstitutet; the size of the Nordic fitness market from
+EuropeActive/Deloitte as quoted in the 2026 case workbook. No broker research, paid databases, the competition's branded
+template or the case team's names and photos are included. Code under the MIT licence.

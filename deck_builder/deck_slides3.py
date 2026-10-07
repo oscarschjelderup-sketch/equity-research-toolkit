@@ -1,8 +1,23 @@
 """Appendix slides and the template guide."""
+import json
+import os
+
 from deck_core import *
 from deck_data import num, pct, mult, HC, FC
 from deck_slides1 import std
-from deck_case import ct
+from deck_case import ct, CASE
+
+
+def _whatif():
+    """The what-if runs for this case (model_builder/whatif_runs*.json written by whatif_runs.py), if present."""
+    name = os.environ.get("EQR_WHATIF") or ("whatif_runs_sats.json" if CASE == "sats_data" else "whatif_runs.json")
+    for folder in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "model_builder"), "."):
+        try:
+            with open(os.path.join(folder, name), encoding="utf8") as f:
+                return json.load(f)
+        except (OSError, ValueError):
+            continue
+    return {}
 
 
 def divider(prs, d):
@@ -216,7 +231,7 @@ def peers_slide(prs, d):
     comp = d.c("Inputs", "company").split(" ASA")[0]
     prem = d.v("Comps", f"M{cr['prem']}")
     mdiff = d.v("Comps", f"R{cr['prem']}")
-    s = std(prs, "Appendix #4.7", "Peer group and multiples",
+    s = std(prs, "Appendix #4.9", "Peer group and multiples",
             f"{comp} trades at a {abs(prem) * 100:.0f}% {'discount' if prem < 0 else 'premium'} to peers on 2027E EV/EBIT "
             f"{'despite' if (prem < 0) == (mdiff > 0) else 'with'} a "
             f"{abs(mdiff) * 100:.0f}pp {'higher' if mdiff > 0 else 'lower'} EBIT margin",
@@ -297,7 +312,7 @@ def peers_slide(prs, d):
 
 # ------------------------------------------------------------------ A4 WACC & assumptions
 def assumptions_slide(prs, d):
-    s = std(prs, "Appendix #4.8", "WACC and key forecast assumptions",
+    s = std(prs, "Appendix #4.10", "WACC and key forecast assumptions",
             f"{d.c('WACC', 'wacc') * 100:.1f}% WACC from a peer-based beta; forecast drivers anchored in the historical "
             f"track record",
             "Sources: Norges Bank (risk-free rate), NFF/PwC risk premium survey, Bloomberg (peer betas), case team "
@@ -374,12 +389,31 @@ def assumptions_slide(prs, d):
                          size=7.5, h=0.163, line_bottom="EEF0F3", fills={1: "F2F3F5"}))
     table(s, rx, 1.82, rw, rows, [2.0, 0.62] + [0.58] * 8)
     tg, ronic, ex_ = d.c("DCF", "tv_g"), d.c("DCF", "tv_ronic"), d.c("DCF", "tv_mult")
-    panel(s, rx, 5.95, rw, 0.9)
-    text(s, rx + 0.15, 6.0, rw - 0.3, 0.8, [
-        ("Terminal assumptions", {"bold": True, "color": NAVY, "size": 9.5, "space_after": 2}),
+    pw = 3.0
+    panel(s, rx, 5.95, pw, 0.9)
+    text(s, rx + 0.12, 5.99, pw - 0.24, 0.84, [
+        ("Terminal assumptions", {"bold": True, "color": NAVY, "size": 9, "space_after": 2}),
         (f"Growth {tg * 100:.1f}% • RONIC {ronic * 100:.0f}% • EBIT margin {d.row('DCF', 'ebit_m', ['S'])[0] * 100:.1f}% "
-         f"(final forecast year) • Long-term tax 22% • Exit multiple cross-check {mult(ex_)} EV/EBITDAaL", {"size": 9}),
-    ], size=9)
+         f"(final year) • Tax 22% • Exit cross-check {mult(ex_)} EV/EBITDAaL", {"size": 8}),
+    ], size=8)
+    # the personnel-cost ratio is the judgement the forecast hinges on – show it and what it costs if we are wrong
+    px, pxw = rx + pw + 0.1, rw - pw - 0.1
+    pr = d.reg["rows"]
+    pers_h = [d.v("Hist", f"{c}{pr['Hist|pers_pct']}") for c in ("I", "K")]
+    pers_f = [-a / b for a, b in zip(d.row("Model", "pers", [FC[0], FC[-1]]), d.row("Model", "is_rev", [FC[0], FC[-1]]))]
+    y1, yl = d.years([FC[0]])[0], d.years([FC[-1]])[0]
+    ya3, ya = d.years([HC[-3]])[0], d.years([HC[-1]])[0]
+    line1 = (f"{pers_h[0] * 100:.1f}% of revenue in {ya3}, {pers_h[1] * 100:.1f}% in {ya}; base case {pers_f[0] * 100:.1f}% in {y1} "
+             f"falling to {pers_f[1] * 100:.1f}% by {yl} as ~{d.c('Drivers', 'pers_fixsh') * 100:.0f}% of it is fixed per club.")
+    wi = _whatif()
+    key = next((k for k in wi if k.startswith("Personnel ratio stays")), None)
+    paras = [("Personnel costs – the key judgement", {"bold": True, "color": NAVY, "size": 9, "space_after": 2}), (line1, {"size": 8})]
+    if key and isinstance(wi[key].get("dcf"), (int, float)):
+        dv = wi[key]["dcf"] - d.c("DCF", "dcf_ps")
+        paras.append((f"If the {ya} ratio persisted (all personnel costs variable): DCF NOK {wi[key]['dcf']:.0f} per share "
+                      f"({dv:+.0f}), rating {wi[key]['rating']}.", {"size": 8, "bold": True}))
+    panel(s, px, 5.95, pxw, 0.9, fill="FFF4D6")
+    text(s, px + 0.12, 5.99, pxw - 0.24, 0.84, paras, size=8)
     text(s, rx, 5.72, rw, 0.2, "¹ History shows the total cost ratio; the fixed part (Drivers E) grows with inflation and "
                                 "the number of locations instead of with revenue.", size=7, italic=True, color=MUTED)
     notes(s, "TEMPLATE: Drivers come from the Drivers sheet (section A) with the 3-year historical average for "
@@ -403,7 +437,7 @@ def risks_slide(prs, d):
     r0 = d.reg["sens"]["t4_rows"][0]
     bear = d.v("Sensitivity", f"{t4['dcf_ps']}{r0}")
     price = d.c("Inputs", "price")
-    s = std(prs, "Appendix #4.9", "Key risks",
+    s = std(prs, "Appendix #4.12", "Key risks",
             f"{'Risks are manageable' if abs(bear / price - 1) < d.c('DCF', 'tp_up') else 'Operating leverage cuts both ways'}"
             f" – our bear case DCF of NOK {bear:.0f} is {abs(bear / price - 1) * 100:.0f}% below "
             f"today's share price, against {d.c('DCF', 'tp_up') * 100:.0f}% upside to our target price",

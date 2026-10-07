@@ -15,7 +15,8 @@ Builds PowerPoint files from a saved workbook, so every number on a slide is the
 3. Run `python build_deck.py` or `python build_chartlib.py` from this folder.
 
 Options of `build_deck.py`: `--model` (workbook), `--map` (its `model_map.json`), `--out`, `--main-only` (cover, team and
-the four content slides – the competition's slide limit) and `--template`.
+the four content slides – the competition's slide limit), `--review` (neutral layout, no team slide and a neutral cover
+subtitle – for readers outside the competition) and `--template`.
 
 **Template.** With `--template path/to/case-template.pptx` (default: `../Equity_Research_Pitch_Template.pptx` if it
 exists) the slides use the template's layouts and placeholders. With `--template none`, or when the file is missing, the
@@ -23,7 +24,7 @@ same layout is drawn on blank slides – same positions, fonts and colours, no l
 path from `EQR_TEMPLATE`.
 
 **Team.** The team slide reads `team/team.json` – `[[name, photo file or null, [line, ...]], ...]` with the photos in
-the same folder. The folder is git-ignored; without it the slide shows placeholders.
+the same folder. The folder is git-ignored; without it (or with `EQR_TEAM=none`) the slide shows placeholders.
 
 ## What comes from the model
 
@@ -39,7 +40,9 @@ the same folder. The folder is git-ignored; without it the slide shows placehold
 | `deck_data.py` | Reads the workbook through `model_map.json` |
 | `deck_slides1-3.py` | Cover, team, the four content slides; DCF, scenario, peer, assumption and risk appendix |
 | `deck_slides4.py` | Market-view appendix: reverse DCF, thesis tracker, consensus, growth engine |
+| `deck_slides3.py` (assumptions) | reads the personnel-cost what-if from `model_builder/whatif_runs*.json` when it exists |
 | `deck_slides5.py` | Market overview from company KPIs and sourced facts (used when the case text module has `market`) |
+| `deck_slides6.py` | Club economics (company guidance vs. the model), revenue-to-cash bridge and capital allocation, competition and macro (case module keys `unit`, `comp`, `macro`) |
 | `deck_case.py`, `sats_deck.py` | Case text selection; the SATS text |
 | `cl_a1-a3.py`, `cl_b1-b2.py` | The chart library (#1–#9) and the frameworks (#1–#10) |
 

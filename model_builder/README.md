@@ -19,7 +19,7 @@ Builds the Excel workbook from code. Change the model here, not by hand in Excel
 | `excel_finalize.py` | Opens the workbook in Excel, creates the data tables, recalculates and checks for errors (Windows) |
 | `verify_dcf.py` | Recalculates the forecast and DCF in Python and runs the reverse-DCF round trips |
 | `stress_test.py` | Flips switches and scenarios in Excel and reports the checks for each (Windows) |
-| `whatif_runs.py` | One-at-a-time sensitivities: value, target price and rating (Windows) |
+| `whatif_runs.py` | One-at-a-time sensitivities: value, target price and rating (Windows); writes `EQR_WHATIF` (default `whatif_runs_sats.json`), which the deck's assumptions slide reads |
 
 ## Build
 
