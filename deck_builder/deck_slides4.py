@@ -227,10 +227,11 @@ def growth_engine_slide(prs, d):
     opens = sum(d.row("Model", "open", cols5))
     newc, lflc, pxc = (sum(d.row("Model", k, cols5)) / 5 for k in ("g_newc", "g_lflc", "g_pxc"))
     s = std(prs, "Appendix #4.6", "Growth engine – like-for-like and new locations",
-            f"{opens:.0f} new locations over {y1}–{y5} add ~{newc * 100:.1f}pp a year, like-for-like ~{lflc * 100:.1f}pp and "
-            f"price/mix ~{pxc * 100:.1f}pp – {cagr * 100:.1f}% revenue CAGR",
-            "Sources: Case team estimates (Excel model, Model and Drivers sheets – location mode). New locations ramp up over "
-            "three years; fixed costs and rent grow with inflation and the number of locations. Figures are illustrative.")
+            ct("growth_subtitle") or (f"{opens:.0f} new locations over {y1}–{y5} add ~{newc * 100:.1f}pp a year, "
+                                      + (f"like-for-like ~{lflc * 100:.1f}pp and " if abs(lflc) >= 0.0005 else "")
+                                      + f"price/mix ~{pxc * 100:.1f}pp – {cagr * 100:.1f}% revenue CAGR"),
+            ct("growth_sources", "Sources: Case team estimates (Excel model, Model and Drivers sheets – location mode). New locations ramp up over "
+            "three years; fixed costs and rent grow with inflation and the number of locations. Figures are illustrative."))
     # left: growth decomposition
     gcols = HC[max(3, ct("hist_first", 0)):] + FC[:5]
     panel_header(s, 0.47, 1.38, 6.1, "Revenue growth by source", None)

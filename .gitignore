@@ -33,3 +33,5 @@ model_builder/model_map_outlet.json
 model_builder/whatif_runs_outlet.json
 deck_builder/outlet_deck.py
 /OUTLET/
+model_builder/sotp_outlet.json
+model_builder/fin.log

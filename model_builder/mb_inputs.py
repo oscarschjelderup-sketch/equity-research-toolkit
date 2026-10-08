@@ -425,9 +425,16 @@ def _drivers_spec():
             if key == "oth_var":
                 extra += f"-N({S('Sensitivity', 'ovr_margin')})"
             if key == "fix_real":
-                _grow = ROWS[("Model", "g_newc")] if ex.ENGINE.get("lease_scale") == "new_revenue" else ROWS[("Model", "loc_g")]
-                return (f"=IF({S('Inputs', 'rev_mode')}=2,(1-{S('Drivers', 'central', 'Drivers')})*"
-                        f"Model!{c}{_grow},{base}{extra})")
+                _ls = ex.ENGINE.get("lease_scale")
+                if _ls == "new_locations":          # openings at last year's revenue per location (same driver as the rent row)
+                    p_ = chr(ord(c) - 1)
+                    r_ = lambda k: ROWS[("Model", k)]
+                    _g = ("(" + "+".join(f"IF(Model!{p_}{r_('loc_' + x)}=0,0,Model!{p_}{r_('rev_' + x)}*(Model!{c}{r_('loc_' + x)}/Model!{p_}{r_('loc_' + x)}-1))"
+                                         for x in "abc") + f")/Model!{p_}{r_('rev')}")
+                else:
+                    _grow = ROWS[("Model", "g_newc")] if _ls == "new_revenue" else ROWS[("Model", "loc_g")]
+                    _g = f"Model!{c}{_grow}"
+                return (f"=IF({S('Inputs', 'rev_mode')}=2,(1-{S('Drivers', 'central', 'Drivers')})*{_g},{base}{extra})")
             return f"={base}{extra}"
         if key == "fix_real":
             lab = "Real growth in the fixed cost base (location mode: from the locations)"

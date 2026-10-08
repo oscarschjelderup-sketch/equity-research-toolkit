@@ -231,7 +231,9 @@ def peers_slide(prs, d):
     comp = d.c("Inputs", "company").split(" ASA")[0]
     prem = d.v("Comps", f"M{cr['prem']}")
     mdiff = d.v("Comps", f"R{cr['prem']}")
+    _ps = ct("peers_subtitle")
     s = std(prs, "Appendix #4.9", "Peer group and multiples",
+            (_ps(d) if callable(_ps) else _ps) or
             f"{comp} trades at a {abs(prem) * 100:.0f}% {'discount' if prem < 0 else 'premium'} to peers on 2027E EV/EBIT "
             f"{'despite' if (prem < 0) == (mdiff > 0) else 'with'} a "
             f"{abs(mdiff) * 100:.0f}pp {'higher' if mdiff > 0 else 'lower'} EBIT margin",
@@ -267,25 +269,28 @@ def peers_slide(prs, d):
     table(s, x, 1.40, w, rows, [2.4, 0.8, 1.1, 1.0, 1.0, 1.0, 1.0, 0.9, 0.9, 1.1, 1.0])
     # chart: EV/EBIT FY2 per company
     by = 4.72
-    panel_header(s, x, by, 6.1, "EV/EBIT 2027E – peers vs. " + comp, None)
     names = [V("B", r).replace(" ASA", "").replace(" AB", "").replace(" A/S", "").replace(" Oyj", "")
              .replace(" plc", "").replace(" SE", "").replace(" NV", "") for r in range(6, 14)]
-    vals = [V("M", r) for r in range(6, 14)]
-    order = sorted(range(8), key=lambda i: -vals[i])
-    cats = [names[i] for i in order] + [comp]
-    series = [vals[i] for i in order] + [V("M", cr["company"])]
-    vmax = max(series) * 1.25
-    cx, cy, cw, chh = x, by + 0.42, 6.1, 1.75
-    gf = add_chart(s, XL_CHART_TYPE.COLUMN_CLUSTERED, cx, cy, cw, chh, cats, [("EV/EBIT", series)], [LBLUE],
-                   size=8, labels=True, num_fmt='0.0"x"', label_pos=XL_LABEL_POSITION.INSIDE_BASE, gap=40,
-                   val_min=0, val_max=vmax, label_color=WHITE)
-    color_points(gf.chart, [LBLUE] * 8 + [NAVY])
-    px, py, pw_, ph = 0.02, 0.05, 0.96, 0.72
-    manual_plot_layout(gf.chart, px, py, pw_, ph)
-    med = V("M", cr["median"])
-    ymed = cy + (py + ph * (1 - med / vmax)) * chh
-    line(s, cx + px * cw, ymed, cx + (px + pw_) * cw, ymed, color=DARK, width=1, dash=MSO_LINE_DASH_STYLE.DASH)
-    text(s, cx + cw - 1.6, ymed - 0.22, 1.55, 0.2, f"Peer median {mult(med)}", size=8, bold=True, align="r")
+    if ct("peer_scatter"):                       # growth-adjusted view instead of the bar chart
+        _peer_scatter(s, d, x, by, comp, V, cr, names)
+    else:
+        panel_header(s, x, by, 6.1, "EV/EBIT 2027E – peers vs. " + comp, None)
+        vals = [V("M", r) for r in range(6, 14)]
+        order = sorted(range(8), key=lambda i: -vals[i])
+        cats = [names[i] for i in order] + [comp]
+        series = [vals[i] for i in order] + [V("M", cr["company"])]
+        vmax = max(series) * 1.25
+        cx, cy, cw, chh = x, by + 0.42, 6.1, 1.75
+        gf = add_chart(s, XL_CHART_TYPE.COLUMN_CLUSTERED, cx, cy, cw, chh, cats, [("EV/EBIT", series)], [LBLUE],
+                       size=8, labels=True, num_fmt='0.0"x"', label_pos=XL_LABEL_POSITION.INSIDE_BASE, gap=40,
+                       val_min=0, val_max=vmax, label_color=WHITE)
+        color_points(gf.chart, [LBLUE] * 8 + [NAVY])
+        px, py, pw_, ph = 0.02, 0.05, 0.96, 0.72
+        manual_plot_layout(gf.chart, px, py, pw_, ph)
+        med = V("M", cr["median"])
+        ymed = cy + (py + ph * (1 - med / vmax)) * chh
+        line(s, cx + px * cw, ymed, cx + (px + pw_) * cw, ymed, color=DARK, width=1, dash=MSO_LINE_DASH_STYLE.DASH)
+        text(s, cx + cw - 1.6, ymed - 0.22, 1.55, 0.2, f"Peer median {mult(med)}", size=8, bold=True, align="r")
     # implied valuation table
     ix, iw = 6.82, 6.05
     panel_header(s, ix, by, iw, "Implied value per share from peer multiples (NOK)", None)
@@ -308,6 +313,51 @@ def peers_slide(prs, d):
     notes(s, "TEMPLATE: Paste the case peer table into the Comps sheet (rows 6-13). Choose the multiples to include "
              "(column J) and the forecast year (Inputs). Explain why the peers are comparable.")
     return s
+
+
+def _peer_scatter(s, d, x, by, comp, V, cr, names):
+    """EV/EBIT (FY2) against revenue growth (or another Comps column) with an OLS line through the peers only, and the
+    value per share the regression multiple would imply for the company (a cross-check, not a target-price input)."""
+    from cl_core import scatter
+    PS = ct("peer_scatter")
+    xcol = PS.get("xcol", "S")
+    yr = str(d.v("Comps", "M5"))
+    panel_header(s, x, by, 6.1, PS.get("title", f"EV/EBIT {yr} vs. revenue growth – is the discount explained by growth?"), None)
+    pts = [(names[i], V(xcol, 6 + i), V("M", 6 + i)) for i in range(8)]
+    pts = [p for p in pts if isinstance(p[1], (int, float)) and isinstance(p[2], (int, float))]
+    cx, cy = V(xcol, cr["company"]), V("M", cr["company"])
+    xs, ys = [p[1] for p in pts], [p[2] for p in pts]
+    n = len(pts)
+    mx, my = sum(xs) / n, sum(ys) / n
+    beta = sum((a - mx) * (b - my) for a, b in zip(xs, ys)) / sum((a - mx) ** 2 for a in xs)
+    alpha = my - beta * mx
+    r2 = 1 - sum((b - (alpha + beta * a)) ** 2 for a, b in zip(xs, ys)) / sum((b - my) ** 2 for b in ys)
+    imp = alpha + beta * cx
+    allx, ally = xs + [cx], ys + [cy, imp]
+    span = max(allx) - min(allx)
+    xlim = (min(allx) - 0.12 * span, max(allx) + 0.42 * span)
+    ylim = (0, max(ally) * 1.18)
+    box = (x, by + 0.42, 6.1, 1.45)
+    plot = (0.10, 0.06, 0.86, 0.66)
+    scatter(s, box, pts + [(comp, cx, cy)], xfmt="0%", yfmt='0"x"', xtitle=PS.get("xtitle", f"Revenue growth {yr} (consensus)"),
+            ytitle=f"EV/EBIT {yr}", highlight=comp, xlim=xlim, ylim=ylim, size=7.5, trend=False, plot=plot)
+    bx, byy, bw, bh = box
+    PX = lambda v: bx + (plot[0] + plot[2] * (v - xlim[0]) / (xlim[1] - xlim[0])) * bw
+    PY = lambda v: byy + (plot[1] + plot[3] * (1 - (v - ylim[0]) / (ylim[1] - ylim[0]))) * bh
+    x0, x1 = xlim[0] + 0.02 * (xlim[1] - xlim[0]), xlim[1] - 0.02 * (xlim[1] - xlim[0])
+    line(s, PX(x0), PY(alpha + beta * x0), PX(x1), PY(alpha + beta * x1), color=MUTED, width=1, dash=MSO_LINE_DASH_STYLE.DASH)
+    circle(s, PX(cx) - 0.07, PY(imp) - 0.07, 0.14, fill=WHITE, line_col=NAVY)
+    text(s, PX(cx) + 0.1, PY(imp) - 0.1, 1.4, 0.2, f"regression {imp:.1f}x", size=7, italic=True, color=NAVY)
+    text(s, bx + 0.75, byy + 0.02, 1.25, 0.18, f"Peers: R² = {r2:.2f}", size=7.5, italic=True, color=MUTED, align="l")
+    r = cr["evebit"]
+    metric, med_m, med_v, shares = V("C", r), V("E", r), V("H", r), d.c("DCF", "shares")
+    bridge_ps = med_v - med_m * metric / shares          # (EV -> equity) per share, implied by the median row
+    val = imp * metric / shares + bridge_ps
+    text(s, x, by + 1.90, 6.1, 0.36,
+         PS.get("note", "Growth explains the peers' multiples (R² {r2:.2f}): at {comp}'s {g:.0f}% growth the line implies "
+                        "{imp:.1f}x EV/EBIT, i.e. NOK {val:.0f} per share – a cross-check, not a target-price input")
+         .format(r2=r2, comp=comp, g=cx * 100, imp=imp, val=val), size=7.5, italic=True, color=MUTED)
+    return val
 
 
 # ------------------------------------------------------------------ A4 WACC & assumptions
@@ -443,7 +493,9 @@ def risks_slide(prs, d):
     r0 = d.reg["sens"]["t4_rows"][0]
     bear = d.v("Sensitivity", f"{t4['dcf_ps']}{r0}")
     price = d.c("Inputs", "price")
+    _rs = ct("risk_subtitle")
     s = std(prs, "Appendix #4.12", "Key risks",
+            (_rs(d) if callable(_rs) else _rs) or
             f"{'Risks are manageable' if abs(bear / price - 1) < d.c('DCF', 'tp_up') else 'Operating leverage cuts both ways'}"
             f" – our bear case DCF of NOK {bear:.0f} is {abs(bear / price - 1) * 100:.0f}% below "
             f"today's share price, against {d.c('DCF', 'tp_up') * 100:.0f}% upside to our target price",

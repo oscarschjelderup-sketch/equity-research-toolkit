@@ -186,6 +186,10 @@ def football(s, d, x, y, w, h):
     text(s, X(price) - 0.57, top - 0.24, 0.55, 0.2, f"{price:.0f}", size=8, bold=True, color=RED, align="r")
     text(s, X(fair) - 0.57, top - 0.24, 0.55, 0.2, f"{fair:.0f}", size=8, bold=True, color=NAVY, align="r")
     text(s, X(tp) + 0.02, top - 0.24, 0.55, 0.2, f"{tp:.0f}", size=8, bold=True, color=GREEN, align="l")
+    ipo = ct("ipo_price")                        # a recent listing: mark the offer price
+    if ipo:
+        line(s, X(ipo), top + 0.02, X(ipo), bot, color=MUTED, width=1, dash=MSO_LINE_DASH_STYLE.ROUND_DOT)
+        text(s, X(ipo) - 0.5, top - 0.43, 1.0, 0.18, f"IPO NOK {ipo:.0f}", size=7, color=MUTED, align="c")
     # legend: values today (price, fair value) vs. the 12-month target price
     lx = x + 0.1
     line(s, lx, y + h + 0.08, lx + 0.25, y + h + 0.08, color=RED, width=1.5, dash=MSO_LINE_DASH_STYLE.DASH)

@@ -20,6 +20,7 @@ Builds the Excel workbook from code. Change the model here, not by hand in Excel
 | `verify_dcf.py` | Recalculates the forecast and DCF in Python and runs the reverse-DCF round trips |
 | `stress_test.py` | Flips switches and scenarios in Excel and reports the checks for each (Windows) |
 | `whatif_runs.py` | One-at-a-time sensitivities: value, target price and rating (Windows); writes `EQR_WHATIF` (default `whatif_runs_sats.json`), which the deck's assumptions slide reads |
+| `sotp_runs.py` | Sum-of-the-parts: rebuilds the DCF step by step in Excel – existing locations only, then expansion capex, then each segment's openings (Windows); writes `EQR_SOTP` (default `sotp_<case>.json`), which the deck's SOTP slide reads |
 
 ## Build
 
@@ -44,6 +45,7 @@ python excel_finalize.py sats_raw.xlsx sats_final.xlsx
 python verify_dcf.py
 python stress_test.py
 python whatif_runs.py
+python sotp_runs.py
 ```
 
 On Windows `cmd` use `set EQR_CASE=sats_data` and so on. If Excel automation fails with `CLSIDToClassMap`, delete

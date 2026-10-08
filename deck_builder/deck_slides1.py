@@ -15,7 +15,13 @@ SHARES = [("Example Company", 0.15), ("Competitor A", 0.12), ("Competitor B", 0.
           ("Others", 0.58)]
 
 
+APPX = {"n": 0}          # appendix slides are numbered in the order they are built (build_deck.py resets the counter)
+
+
 def std(prs, chapter, title, subtitle, footnote):
+    if chapter and chapter.startswith("Appendix #4."):
+        APPX["n"] += 1
+        chapter = f"Appendix #4.{APPX['n']}"
     return new_slide(prs, "No objects", title=title, subtitle=subtitle, chapter=chapter, footnote=case_fn(footnote))
 
 

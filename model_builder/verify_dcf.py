@@ -52,13 +52,16 @@ def forecast(mode, dm=0.0, dg=0.0):
     R_prev = sum(rev.values())
     o = {k: [] for k in ["rev", "ebit", "ebitdaal", "nopat", "capex", "fcff", "net_inv", "loc", "tax"]}
     for i in range(8):
-        opened, L_tot, newc = 0.0, 0.0, 0.0
+        opened, L_tot, newc, newf = 0.0, 0.0, 0.0, 0.0
         for s in SEG:
             k = KEY[s]
             if mode == 2:
                 net = B["net" + s][i]
                 op = max(0.0, net)
+                loc_prev = loc[s]
                 loc[s] += net
+                if loc_prev:
+                    newf += rev[s] * (loc[s] / loc_prev - 1)        # openings at last year's revenue per location (lease_scale 'new_locations')
                 o3, o2, o1 = opens[s]
                 meq_prev = meq[s]
                 meq[s] = meq[s] + min(0.0, net) + op * r1 + o1 * (r2 - r1) + o2 * (r3 - r2) + o3 * (1 - r3)
@@ -77,7 +80,7 @@ def forecast(mode, dm=0.0, dg=0.0):
         cpi = B["cpi"][i]
         avg = (L_prev + L_tot) / 2
         loc_g = avg / avg_prev - 1
-        grow = newc / R_prev if ex.ENGINE.get("lease_scale") == "new_revenue" else loc_g   # rent and the fixed base: store count or new-store revenue
+        grow = {"new_revenue": newc / R_prev, "new_locations": newf / R_prev}.get(ex.ENGINE.get("lease_scale"), loc_g)   # rent and the fixed base
         fix_real = (1 - C["central"]) * grow if mode == 2 else B["fix_real"][i]
         pers_fix *= (1 + cpi) * (1 + fix_real)
         oth_fix *= (1 + cpi) * (1 + fix_real)

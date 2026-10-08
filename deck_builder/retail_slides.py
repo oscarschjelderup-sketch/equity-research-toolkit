@@ -1,10 +1,13 @@
 """Retail-case slides (used when the case text module provides the keys): market overview for a store chain, store
 economics, company targets vs. the model (in place of the consensus slide) and the cash picture of a roll-out."""
+import json
+import os
+
 from deck_core import *
 from deck_data import num, pct, mult, HC, FC
 from deck_slides1 import std
-from deck_case import ct
-from cl_core import waterfall
+from deck_case import ct, CASE
+from cl_core import waterfall, geo
 
 PALE = "D6E6EC"
 
@@ -266,13 +269,193 @@ def cash_slide_retail(prs, d):
     table(s, 0.47, y0 + 0.44, 8.4, rows, [3.0] + [0.9] * 6)
     panel(s, 9.10, y0 + 0.44, 3.77, 1.82)
     nwc_pct = d.row("Drivers", "nwc", [FC[0], FC[4]])
-    text(s, 9.22, y0 + 0.50, 3.55, 1.75, [
-        ("Why cash lags profit", {"bold": True, "color": NAVY, "size": 10, "space_after": 3}),
-        (f"Inventory: working capital is {nwc_pct[0] * 100:.0f}% of revenue – every NOK 100m of growth ties up NOK {nwc_pct[0] * 100:.0f}m; "
-         f"we take it to {nwc_pct[1] * 100:.0f}% as Kids Outlet (lighter stock) grows and the warehouse automates.", {"bullet": True, "space_after": 2}),
-        ("The NOK ~1bn warehouse is 70% debt-financed per the prospectus; the IPO proceeds cover the equity part.", {"bullet": True, "space_after": 2}),
-        ("Hence a payout at the lower end of 50-80% and leverage above the <1.0x target in 2027-29E – unless the roll-out slows.", {"bullet": True}),
-    ], size=8.5)
+    why = ct("cash_why") or [
+        "Inventory: working capital is {nwc0:.0f}% of revenue – every NOK 100m of growth ties up NOK {nwc0:.0f}m; "
+        "we take it to {nwc1:.0f}% as Kids Outlet (lighter stock) grows and the warehouse automates.",
+        "The NOK ~1bn warehouse is 70% debt-financed per the prospectus; the IPO proceeds cover the equity part.",
+        "Hence a payout at the lower end of 50-80% and leverage above the <1.0x target in 2027-29E – unless the roll-out slows."]
+    why = [t.format(nwc0=nwc_pct[0] * 100, nwc1=nwc_pct[1] * 100) for t in why]
+    text(s, 9.22, y0 + 0.50, 3.55, 1.75, [("Why cash lags profit", {"bold": True, "color": NAVY, "size": 10, "space_after": 3})] +
+         [(t, {"bullet": True, "space_after": 2}) for t in why], size=8.5)
     notes(s, "TALKING POINT: the equity story is high growth with high payout and low leverage. Our numbers say two of the three hold at a "
              "time while the warehouse is built. That is the tension to watch in the 2027 capex guidance and the dividend proposals.")
+    return s
+
+
+# ------------------------------------------------------------------ sum-of-the-parts: the existing estate and the roll-out
+def _sotp_json():
+    """sotp_<case>.json written by model_builder/sotp_runs.py (EQR_SOTP overrides the name), if present."""
+    name = os.environ.get("EQR_SOTP") or f"sotp_{CASE.replace('_data', '')}.json"
+    for folder in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "model_builder"), "."):
+        try:
+            with open(os.path.join(folder, name), encoding="utf8") as f:
+                return json.load(f)
+        except (OSError, ValueError):
+            continue
+    return None
+
+
+def sotp_slide(prs, d):
+    """DCF value built up from the existing estate to the base case, block by block (sotp_runs.py)."""
+    S = ct("sotp")
+    J = _sotp_json()
+    if not J:
+        print("sotp_slide: no sotp_<case>.json – run model_builder/sotp_runs.py first; slide skipped")
+        return None
+    steps = J["steps"]
+    price, shares, dcf = d.c("Inputs", "price"), d.c("DCF", "shares"), d.c("DCF", "dcf_ps")
+    yl = str(J.get("last_year") or d.years([FC[-1]])[0])
+    est = steps[0]["dcf"]
+    roll = dcf - est
+    paid = price - est
+    deltas = [(st["tag"], st["dcf"] - steps[i]["dcf"], st) for i, st in enumerate(steps[1:])]
+    s = std(prs, "Appendix #4.3", S.get("title", "What is in the price – the existing estate and the roll-out"),
+            S.get("subtitle") or f"The existing stores are worth NOK {est:.0f} per share; the roll-out adds NOK {roll:.0f} – "
+                                 f"at NOK {price:.0f} the market pays NOK {paid:.0f} for it, {paid / roll * 100:.0f}% of our value",
+            S["sources"])
+    # left: waterfall of the value per share
+    x, w = 0.47, 7.35
+    panel_header(s, x, 1.38, w, "DCF value per share by building block (NOK)", None)
+    wsteps = [(S.get("estate_label", "Existing estate(1)"), est, "total")] + [(tag, dv, "delta") for tag, dv, _ in deltas] + \
+             [("Base case DCF", dcf, "total"), (f"Share price", price, "total")]
+    tops, run = [], 0.0
+    for lab, v, kind in wsteps:
+        if kind == "total":
+            run = v
+            tops.append(v)
+        elif v >= 0:
+            run += v
+            tops.append(run)
+        else:
+            tops.append(run)
+            run += v
+    vmax = max(tops + [price]) * 1.18
+    box = (x, 1.80, w, 2.55)
+    plot = (0.02, 0.08, 0.96, 0.72)
+    gf = waterfall(s, box, wsteps, fmt="{:.1f}", size=7.5, vmax=vmax, plot=plot)
+    color_points(gf.chart, [NAVY] * (len(wsteps) - 1) + [RED], series_idx=1)      # the share price bar in red
+    text(s, x, 4.38, w, 0.32, S.get("note", "(1) No new stores from the first forecast year and no expansion capex; like-for-like "
+                                          "growth, margins and the dividend policy as in the base case."), size=7, italic=True, color=MUTED)
+    # right: what the market pays for
+    rx, rw = 8.05, 4.82
+    panel_header(s, rx, 1.38, rw, S.get("box_title", "What the market pays for"), None)
+    panel(s, rx, 1.80, rw, 2.85)
+    big = max(deltas, key=lambda t: t[1])
+    capx = [t for t in deltas if t[1] < 0]
+    items = [f"**The estate is most of the price:** at NOK {price:.0f} the market value is NOK {price * shares / 1000:.1f}bn; the existing "
+             f"stores alone are worth NOK {est * shares / 1000:.1f}bn with like-for-like growth – the roll-out is priced at NOK {paid:.0f} "
+             f"per share against our NOK {roll:.0f}",
+             f"**{big[0]} is the swing factor:** NOK {big[1]:.0f} per share, {big[1] / roll * 100:.0f}% of the roll-out value"
+             + (f" – {S['big_note']}" if S.get("big_note") else "")]
+    if capx:
+        items.append(f"**{capx[0][0]} costs NOK {abs(capx[0][1]):.1f} per share on its own** – it pays only through the openings it "
+                     f"enables" + (f"; {S['capex_note']}" if S.get("capex_note") else ""))
+    items += S.get("bullets", [])
+    text(s, rx + 0.12, 1.88, rw - 0.24, 2.72, [(t, {"bullet": True, "space_after": 5}) for t in items], size=9)
+    # bottom: the building blocks in numbers
+    y0 = 4.78
+    panel_header(s, 0.47, y0, 12.40, f"DCF building blocks – cumulative ({yl} figures, NOKm)", None)
+    hdr = _hdr(["Block", "Stores added", f"Stores {yl}", f"Revenue {yl}", f"EBIT adj. margin {yl}", "Peak NIBD/EBITDAaL", "EV", "Equity value",
+                "NOK per share", "Δ NOK per share", "Value per store added", "Investment per store(2)"], h=0.3, size=7.5)
+    rows = [hdr]
+    inv = S.get("invest", {})
+    for i, st in enumerate(steps):
+        dv = st["dcf"] - steps[i - 1]["dcf"] if i else None
+        n = st.get("stores") or 0
+        per = (dv * shares / n) if (dv is not None and n) else None
+        iv = inv.get(st.get("seg"))
+        cells = [st["tag"], f"{n:.0f}" if n else "–", f"{st['loc_last']:.0f}", f"{st['rev_last']:,.0f}", f"{st['ebit_m_last'] * 100:.1f}%",
+                 f"{st['lev_max']:.1f}x" if isinstance(st.get("lev_max"), (int, float)) else "–", f"{st['ev']:,.0f}", f"{st['eq']:,.0f}",
+                 f"{st['dcf']:.1f}", (f"{dv:+.1f}" if dv is not None else "–"), (f"{per:.1f}" if per else "–"), (f"{iv:.1f}" if iv else "–")]
+        last = i == len(steps) - 1
+        rows.append(dict(cells=cells, size=8, h=0.235, line_bottom="E1E5EA", bolds={0: True, 8: True}, align={j: "c" for j in range(1, 12)},
+                         fill=PALEBLUE if last else None, line_top=NAVY if last else None))
+    table(s, 0.47, y0 + 0.44, 12.40, rows, [2.35, 0.8, 0.8, 0.95, 1.0, 1.0, 0.85, 0.95, 0.85, 0.9, 1.0, 0.95])
+    notes(s, "TALKING POINT: the sum-of-the-parts separates what the market pays for the stores that exist from what it pays for the "
+             "plan. The deltas are sequential (each block is added on top of the previous one), so the order matters at the margin.")
+    return s
+
+
+# ------------------------------------------------------------------ margin bridge, inventory vs. peers and the latest half-year
+def margin_bridge_slide(prs, d):
+    M = ct("margin_slide")
+    k, p = HC[-1], FC[4]
+    ya, y5 = d.years([k])[0], d.years([p])[0]
+    rev = d.row("Model", "is_rev", [k, p])
+    ratio = lambda key: [a / r for a, r in zip(d.row("Model", key, [k, p]), rev)]
+    gm = d.row("Model", "gm", [k, p])
+    pers, oth, lease, da = ratio("pers"), ratio("oth"), ratio("lease"), ratio("da")
+    m = d.row("Model", "ebit_adj_m", [k, p])
+    parts = [("Gross margin", gm), ("Personnel", pers), ("Other opex", oth), ("Rent (lease payments)", lease), ("D&A, owned assets", da)]
+    steps = [(f"EBIT adj. {ya}", m[0] * 100, "total")] + [(lab, (v[1] - v[0]) * 100, "delta") for lab, v in parts] + \
+            [(f"EBIT adj. {y5}", m[1] * 100, "total")]
+    inv_co = d.row("Hist", "inv", [k])[0] / rev[0]
+    peers = sorted(M["peers"], key=lambda t: -t[1])
+    med = sorted(v for _, v in peers)[len(peers) // 2]
+    lev_pp = ((lease[1] - lease[0]) + (pers[1] - pers[0]) + (oth[1] - oth[0])) * 100
+    s = std(prs, "Appendix #4.9", M.get("title", "Where the margin comes from – and what it costs in stock"),
+            M.get("subtitle") or f"Margin {m[0] * 100:.1f}% → {m[1] * 100:.1f}% by {y5}: gross margin {(gm[1] - gm[0]) * 100:+.1f}pp, "
+                                 f"cost leverage {lev_pp:+.1f}pp, warehouse D&A {(da[1] - da[0]) * 100:+.1f}pp – and stock is {inv_co / med:.1f}x the peers'",
+            M["sources"])
+    # left: margin bridge
+    x, w = 0.47, 6.1
+    panel_header(s, x, 1.38, w, f"EBIT adj. margin bridge {ya} → {y5} (pp of revenue)", None)
+    waterfall(s, (x, 1.80, w, 2.25), steps, fmt="{:.1f}", size=7.5, plot=(0.02, 0.08, 0.96, 0.72))
+    text(s, x, 4.08, w, 0.36, M.get("bridge_note", "Pre-IFRS 16: rent is an operating cost. Store staff and variable costs scale with sales; "
+                                                    "rent and the fixed base grow with inflation and the mature revenue of new stores."),
+         size=7, italic=True, color=MUTED)
+    # right: inventory vs peers
+    rx, rw = 6.77, 6.1
+    panel_header(s, rx, 1.38, rw, M.get("inv_title", "Inventory in % of revenue – latest balance sheet vs. listed peers"), None)
+    comp = d.c("Inputs", "company").split(" ASA")[0]
+    cats = [f"{comp} ({ya})"] + [n for n, _ in peers]
+    vals = [inv_co] + [v for _, v in peers]
+    gf = add_chart(s, XL_CHART_TYPE.COLUMN_CLUSTERED, rx, 1.80, rw, 2.25, cats, [("Inventory / revenue", vals)], [LBLUE], size=7.5,
+                   labels=True, num_fmt="0%", label_pos=XL_LABEL_POSITION.OUTSIDE_END, gap=45, val_min=0, val_max=max(vals) * 1.25)
+    color_points(gf.chart, [NAVY] + [LBLUE] * len(peers))
+    px_, py_, pw_, ph_ = 0.02, 0.05, 0.96, 0.70
+    manual_plot_layout(gf.chart, px_, py_, pw_, ph_)
+    ymed = 1.80 + (py_ + ph_ * (1 - med / (max(vals) * 1.25))) * 2.25
+    line(s, rx + px_ * rw, ymed, rx + (px_ + pw_) * rw, ymed, color=DARK, width=1, dash=MSO_LINE_DASH_STYLE.DASH)
+    text(s, rx + rw - 1.7, ymed - 0.40, 1.65, 0.2, f"Peer median {med * 100:.0f}%", size=8, bold=True, align="r")
+    text(s, rx, 4.08, rw, 0.36, M.get("inv_note", ""), size=7, italic=True, color=MUTED)
+    # bottom: the latest half-year against our full-year estimate
+    I = M["interim"]
+    h1p, h1l = I["h1_prev"], I["h1_last"]
+    y1 = d.years([FC[0]])[0]
+    fy = {}
+    for col, lab in ((k, ya), (FC[0], y1)):
+        r_, c_, e_, o_, l_ = (d.row("Model", key, [col])[0] for key in ("is_rev", "cogs", "ebitda", "ebit", "loc"))
+        fy[lab] = dict(rev=r_, cogs=-c_, ebitda=e_, ebit=o_, stores=l_)
+    h2p = {key: fy[ya][key] - h1p[key] for key in ("rev", "cogs", "ebitda", "ebit")}
+    h2l = {key: fy[y1][key] - h1l[key] for key in ("rev", "cogs", "ebitda", "ebit")}
+    h2p["stores"], h2l["stores"] = fy[ya]["stores"], fy[y1]["stores"]
+    cols = [(h1p["label"], h1p, None), (h1l["label"], h1l, h1p), (I.get("h2_prev_label", f"H2 {str(ya)[:4]}A"), h2p, None),
+            (I.get("h2_last_label", f"H2 {str(y1)[:4]}E implied"), h2l, h2p), (f"FY {ya}", fy[ya], None), (f"FY {y1}", fy[y1], fy[ya])]
+    y0 = 4.50
+    panel_header(s, 0.47, y0, 12.40, M.get("interim_title", f"The latest half-year against our full-year estimate – what {y1} implies for the second half"), None)
+    hdr = _hdr([""] + [c[0] for c in cols], h=0.27, size=8)
+    rows = [hdr]
+    spec = [("Revenue (NOKm)", lambda v, b: f"{v['rev']:,.0f}", True),
+            ("Growth y/y", lambda v, b: (f"{v['rev'] / b['rev'] - 1:+.1%}" if b else "–"), False),
+            ("Gross margin(1)", lambda v, b: f"{1 - v['cogs'] / v['rev']:.1%}", False),
+            ("EBITDA margin (IFRS 16)", lambda v, b: f"{v['ebitda'] / v['rev']:.1%}", False),
+            ("EBIT margin (IFRS 16)", lambda v, b: f"{v['ebit'] / v['rev']:.1%}", True),
+            ("Stores, period end", lambda v, b: f"{v['stores']:.0f}", False)]
+    for lab, f_, bold in spec:
+        rows.append(dict(cells=[lab] + [f_(v, b) for _, v, b in cols], size=8.5, h=0.235, line_bottom="E1E5EA", bolds={0: bold},
+                         align={j: "c" for j in range(1, 7)}, fills={4: PALEBLUE, 6: PALEBLUE}))
+    table(s, 0.47, y0 + 0.44, 7.95, rows, [2.15] + [0.966] * 6)
+    panel(s, 8.62, y0 + 0.44, 4.25, 1.84)
+    nums = dict(h1_g=(h1l["rev"] / h1p["rev"] - 1) * 100, h2_g=(h2l["rev"] / h2p["rev"] - 1) * 100, fy_g=(fy[y1]["rev"] / fy[ya]["rev"] - 1) * 100,
+                h1_em=h1l["ebitda"] / h1l["rev"] * 100, h1_dem=(h1l["ebitda"] / h1l["rev"] - h1p["ebitda"] / h1p["rev"]) * 100,
+                h2_em=h2l["ebitda"] / h2l["rev"] * 100, h2p_em=h2p["ebitda"] / h2p["rev"] * 100,
+                h2_dem=(h2l["ebitda"] / h2l["rev"] - h2p["ebitda"] / h2p["rev"]) * 100, fy_em=fy[y1]["ebitda"] / fy[y1]["rev"] * 100,
+                h1_gm=(1 - h1l["cogs"] / h1l["rev"]) * 100, h2_gm=(1 - h2l["cogs"] / h2l["rev"]) * 100, h2p_gm=(1 - h2p["cogs"] / h2p["rev"]) * 100,
+                h2_rev=h2l["rev"], h2p_rev=h2p["rev"])
+    text(s, 8.74, y0 + 0.50, 4.0, 1.76, [(M.get("interim_box_title", "What it tells us"), {"bold": True, "color": NAVY, "size": 10, "space_after": 3})] +
+         [(t.format(**nums), {"bullet": True, "space_after": 2}) for t in M["interim_bullets"]], size=8.5)
+    notes(s, "TALKING POINT: the bridge shows where the margin comes from (gross margin and rent leverage) and what it costs "
+             "(D&A on the warehouse). The inventory chart is the price of the own-brand model. The half-year table anchors the "
+             "first forecast year on the only post-prospectus data point.")
     return s

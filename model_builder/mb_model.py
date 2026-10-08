@@ -113,12 +113,16 @@ def _model_spec():
     t.row("ebitda_m", "EBITDA margin", "%", fmt=F_PCT, italic=True, hist=m("{ebitda}/{is_rev}"), fc=m("{ebitda}/{is_rev}"))
     t.blank()
     # location mode: rent grows with cost inflation and the store count – or, for chains with stores of very different
-    # sizes (ENGINE['lease_scale'] = 'new_revenue'), with the revenue the new locations add
-    _grow = "{g_newc}" if ex.ENGINE.get("lease_scale") == "new_revenue" else "{loc_g}"
+    # sizes, with the revenue the new locations add: ramped (ENGINE['lease_scale'] = 'new_revenue', Model row g_newc) or at
+    # maturity from the opening year ('new_locations': openings at last year's revenue per location – rent and staff are
+    # paid from day one)
+    _ls = ex.ENGINE.get("lease_scale")
+    _grow = {"new_revenue": "{g_newc}", "new_locations": cap("loc")}.get(_ls, "{loc_g}")
+    _how = {"new_revenue": "the revenue added by new locations (ramped)",
+            "new_locations": "the mature revenue of the locations opened (at last year's revenue per location)"}.get(_ls, "the number of locations")
     t.row("lease", "Lease payments (IFRS 16 adjustment)", "NOKm", hist=HL("lease_pay"),
           fc=m("IF(@rev_mode=2,[lease]*(1+<cpi>)*(1+" + _grow + "),-{is_rev}*<lease>)"),
-          note="Rent. Location mode: rent grows with cost inflation and " + ("the revenue added by new locations" if _grow == "{g_newc}" else "the number of locations")
-               + "; segment mode: % of revenue. An operating cost in the DCF")
+          note="Rent. Location mode: rent grows with cost inflation and " + _how + "; segment mode: % of revenue. An operating cost in the DCF")
     t.row("ebitdaal", "EBITDAaL (pre-IFRS 16)", "NOKm", bold=True, line=True,
           hist=m("{ebitda}+{lease}"), fc=m("{ebitda}+{lease}"))
     t.row("ebitdaal_m", "EBITDAaL margin", "%", fmt=F_PCT, italic=True,
