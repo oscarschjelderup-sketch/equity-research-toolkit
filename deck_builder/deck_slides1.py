@@ -106,9 +106,10 @@ def company_overview(prs, d):
     panel_header(s, x, y1, w, "Company snapshot", 1)
     panel(s, x, y1 + 0.42, w, 2.0)
     vol = sum(d.row("Hist", k, ["K"])[0] for k in ["vol_a", "vol_b", "vol_c"])
-    rows = [("Sector", d.c("Inputs", "sector")), ("Headquarters", "Oslo, Norway"),
+    rows = [("Sector", d.c("Inputs", "sector")), ("Headquarters", ct("ov_hq", "Oslo, Norway")),
             ("Listing", f"{d.c('Inputs', 'exchange')} ({d.c('Inputs', 'ticker')})"),
-            (ct("vol_label", "Subscribers") + " (2025)", f"{num(vol)}k"), ("Locations (2025)", num(d.row("Hist", "locations", ["K"])[0])),
+            (ct("vol_label", "Subscribers") + " (2025)", f"{num(vol)}{ct('vol_suffix', 'k')}"),
+            ct("ov_loc_row") or ("Locations (2025)", num(d.row("Hist", "locations", ["K"])[0])),
             ct("employees_row") or ("Employees (FTE)", num(d.row("Hist", "ftes", ["K"])[0])),
             ("Market cap (NOKm)", num(d.c("Inputs", "mcap"))),
             ("Enterprise value (NOKm)", num(d.c("Inputs", "ev_ex")))]
@@ -116,7 +117,7 @@ def company_overview(prs, d):
           [dict(cells=[a, b], bolds={0: True}, size=9.5, h=0.225) for a, b in rows], [1.9, 1.8])
     # 2 business model
     x, w = cols[1]
-    panel_header(s, x, y1, w, "Scalable model with pricing power", 2)
+    panel_header(s, x, y1, w, ct("ov_panel2", "Scalable model with pricing power"), 2)
     panel(s, x, y1 + 0.42, w, 2.0)
     pxc = d.row("Model", "g_pxc", ["H", "I", "J", "K"])
     m21, m25 = d.row("Model", "ebit_adj_m", ["G", "K"])
@@ -128,7 +129,7 @@ def company_overview(prs, d):
          {"bullet": True, "space_after": 5}),
         (ct("ov_leverage") or f"**Operating leverage:** EBIT adj. margin up from {m21 * 100:.1f}% ({y21}) to {m25 * 100:.1f}% ({y25})",
          {"bullet": True, "space_after": 5}),
-        (f"**Capital light:** capex {capex25 * 100:.1f}% of sales and negative working capital", {"bullet": True}),
+        (ct("ov_fourth") or f"**Capital light:** capex {capex25 * 100:.1f}% of sales and negative working capital", {"bullet": True}),
     ], size=9.5)
     # 3 management
     x, w = cols[2]
@@ -150,7 +151,7 @@ def company_overview(prs, d):
     rev = [d.row("Hist", k, ["K"])[0] for k in ("rev_a", "rev_b", "rev_c")]
     vols = [d.row("Hist", k, ["K"])[0] for k in ("vol_a", "vol_b", "vol_c")]
     for j, (vals, lab, centre) in enumerate([(rev, "Revenue", f"NOKm\n{num(sum(rev))}"),
-                                             (vols, ct("vol_label", "Subscribers"), f"{num(sum(vols))}k")]):
+                                             (vols, ct("vol_label", "Subscribers"), f"{num(sum(vols))}{ct('vol_suffix', 'k')}")]):
         cx = x + 0.05 + j * 1.95
         gf = add_chart(s, XL_CHART_TYPE.DOUGHNUT, cx, y2 + 0.62, 1.85, 1.45, segs, [(lab, vals)],
                        [NAVY], size=7, legend=None, labels=True, num_fmt="0%")
@@ -177,7 +178,7 @@ def company_overview(prs, d):
         text(s, lx + 0.16, y2 + 2.08, 1.1, 0.22, sg, size=8, color=DARK)
     # 5 revenue & margin combo
     x, w = cols[1]
-    panel_header(s, x, y2, w, "Consistent growth with margin expansion", 5)
+    panel_header(s, x, y2, w, ct("ov_panel5", "Consistent growth with margin expansion"), 5)
     cols5 = HC[ct("ov_hist_from", 2):] + FC[:3]
     yrs = d.years(cols5)
     revs = d.row("Model", "is_rev", cols5)
@@ -230,6 +231,9 @@ def market_overview(prs, d):
     if ct("market"):                     # case module supplies a sourced market slide
         from deck_slides5 import market_overview_kpi
         return market_overview_kpi(prs, d, ct("market"), std)
+    if ct("market_retail"):              # store chain: market size, share, runway
+        from retail_slides import market_overview_retail
+        return market_overview_retail(prs, d)
     cagr = (MKT_SIZE[-1] / MKT_SIZE[6]) ** (1 / 5) - 1
     s = std(prs, "#2 Attractive market supported by structural tailwinds", "Market overview",
             f"A NOK {MKT_SIZE[6]:.0f}bn Nordic market growing ~{cagr * 100:.0f}% p.a. – {comp.split(' ASA')[0]} is positioned to keep outgrowing it",
@@ -262,7 +266,7 @@ def market_overview(prs, d):
     x, w = gx[1]
     panel_header(s, x, y1, w, "Consistently outgrowing the market", 2)
     panel(s, x, y1 + 0.42, w, 2.30)
-    cols2 = HC[3:] + FC[:3]
+    cols2 = HC[max(3, ct("hist_first", 0)):] + FC[:3]
     yrs2 = d.years(cols2)
     comp_g = d.row("Model", "grev", cols2)
     mkt_g = [MKT_SIZE[i] / MKT_SIZE[i - 1] - 1 for i in range(3, 10)]

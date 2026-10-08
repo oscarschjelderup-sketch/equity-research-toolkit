@@ -425,8 +425,9 @@ def _drivers_spec():
             if key == "oth_var":
                 extra += f"-N({S('Sensitivity', 'ovr_margin')})"
             if key == "fix_real":
+                _grow = ROWS[("Model", "g_newc")] if ex.ENGINE.get("lease_scale") == "new_revenue" else ROWS[("Model", "loc_g")]
                 return (f"=IF({S('Inputs', 'rev_mode')}=2,(1-{S('Drivers', 'central', 'Drivers')})*"
-                        f"Model!{c}{ROWS[('Model', 'loc_g')]},{base}{extra})")
+                        f"Model!{c}{_grow},{base}{extra})")
             return f"={base}{extra}"
         if key == "fix_real":
             lab = "Real growth in the fixed cost base (location mode: from the locations)"

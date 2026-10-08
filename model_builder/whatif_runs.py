@@ -92,6 +92,8 @@ try:
     pers_tot = ws("Hist").Range(f"K{R('Hist', 'pers_pct')}").Value          # last actual year's total cost ratios
     oth_tot = ws("Hist").Range(f"K{R('Hist', 'oth_pct')}").Value
     run(PERS_RUN, [("c", "Drivers", "pers_fixsh_in", 0.0), ("r", "Drivers", "b_pers_var", [pers_tot] * 8)])
+    cogs_tot = ws("Hist").Range(f"K{R('Hist', 'cogs_pct')}").Value
+    run("Gross margin stays at the last actual level", [("r", "Drivers", "b_cogs", [cogs_tot] * 8)])
     run("All costs variable (no operating leverage)", [("c", "Drivers", "pers_fixsh_in", 0.0), ("c", "Drivers", "oth_fixsh_in", 0.0),
                                                       ("r", "Drivers", "b_pers_var", [pers_tot] * 8),
                                                       ("r", "Drivers", "b_oth_var", [oth_tot] * 8)])

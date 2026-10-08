@@ -24,3 +24,12 @@ model_builder/whatif_runs.json
 deck_builder/team/
 # - old versions
 /Arkiv/
+
+# Private cases (not published): Outlet Group
+model_builder/outlet_data.py
+model_builder/outlet_raw.xlsx
+model_builder/outlet_final.xlsx
+model_builder/model_map_outlet.json
+model_builder/whatif_runs_outlet.json
+deck_builder/outlet_deck.py
+/OUTLET/

@@ -22,6 +22,7 @@ import deck_slides2 as s2  # noqa: E402
 import deck_slides3 as s3  # noqa: E402
 import deck_slides4 as s4  # noqa: E402
 import deck_slides6 as s6  # noqa: E402
+import retail_slides as s7  # noqa: E402
 import deck_case  # noqa: E402
 from deck_case import ct  # noqa: E402
 
@@ -46,19 +47,23 @@ os.chdir(HERE)                       # team photos and model_map.json are read r
 prs = open_template(template)
 print("Layout:", "neutral (no template)" if getattr(prs, "_eqr_neutral", False) else template)
 d = ModelData(model, map_path)
-# company-specific appendix slides need their text block in the case module (sats_deck.py: unit, comp/macro)
-case_slides = {s6.unit_economics_slide: "unit", s6.cash_slide: None, s6.competition_macro_slide: "comp"}
+# company-specific appendix slides need their text block in the case module (sats_deck.py: unit, comp/macro;
+# outlet_deck.py: store_econ, targets, market_retail)
+case_slides = {s6.unit_economics_slide: "unit", s6.cash_slide: None, s6.competition_macro_slide: "comp",
+               s7.store_economics_slide: "store_econ", s7.targets_slide: "targets", s7.cash_slide_retail: "store_econ"}
 for fn in (s1.cover, s1.team, s1.company_overview, s1.market_overview, s2.financials, s2.valuation,
-           s3.divider, s3.dcf_slide, s4.reverse_dcf_slide, s3.scenario_slide, s4.thesis_slide, s4.consensus_slide,
-           s4.growth_engine_slide, s6.unit_economics_slide, s6.cash_slide, s3.peers_slide, s3.assumptions_slide,
-           s6.competition_macro_slide, s3.risks_slide, s3.guide_slide):
+           s3.divider, s3.dcf_slide, s4.reverse_dcf_slide, s3.scenario_slide, s4.thesis_slide, s4.consensus_slide, s7.targets_slide,
+           s4.growth_engine_slide, s6.unit_economics_slide, s7.store_economics_slide, s6.cash_slide, s7.cash_slide_retail,
+           s3.peers_slide, s3.assumptions_slide, s6.competition_macro_slide, s3.risks_slide, s3.guide_slide):
     if fn is s3.guide_slide and ct("skip_guide"):      # a case deck does not need the template guide
         continue
     if fn is s1.team and args.review:                  # no names and photos in the review edition
         continue
     if fn in case_slides and case_slides[fn] and not ct(case_slides[fn]):
         continue
-    if fn is s6.cash_slide and not ct("unit"):          # the model-only cash slide belongs to a real case too
+    if fn is s4.consensus_slide and ct("targets"):     # no consensus: the targets slide takes its place
+        continue
+    if fn is s6.cash_slide and (not ct("unit") or ct("store_econ")):   # the model-only cash slide belongs to a real case too
         continue
     if args.main_only and fn is s3.divider:            # the appendix is Q&A back-up, not part of the submission
         break

@@ -4,8 +4,12 @@ import os
 import sys
 import openpyxl
 from openpyxl.workbook.defined_name import DefinedName
+import mb_core
 from mb_core import ROWS, CELLS, S
+import case_data
 import mb_inputs
+
+mb_core.HIST_START = getattr(case_data, "HIST_START", 0)
 import mb_model
 import mb_fin
 import mb_val

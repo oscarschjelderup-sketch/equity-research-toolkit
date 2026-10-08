@@ -175,8 +175,8 @@ def competition_macro_slide(prs, d):
     s = std(prs, "Appendix #4.11", "Competitive landscape and macro backdrop", Cp["subtitle"], Cp["sources"])
     # left: operators
     x, w = 0.47, 7.35
-    panel_header(s, x, 1.38, w, "Nordic fitness operators – positioning and indicative list prices", None)
-    rows = [dict(cells=["Operator", "Segment", "Markets", "Clubs", "Monthly price", "Note"], fill=NAVY, color=WHITE, bold=True, size=8, h=0.26)]
+    panel_header(s, x, 1.38, w, Cp.get("title", "Nordic fitness operators – positioning and indicative list prices"), None)
+    rows = [dict(cells=Cp.get("headers", ["Operator", "Segment", "Markets", "Clubs", "Monthly price", "Note"]), fill=NAVY, color=WHITE, bold=True, size=8, h=0.26)]
     for i, r in enumerate(Cp["rows"]):
         sats = i < 2
         rows.append(dict(cells=list(r), size=8, h=0.33, line_bottom="E1E5EA", bolds={0: True}, fill="E4EEF2" if sats else None,
@@ -186,12 +186,14 @@ def competition_macro_slide(prs, d):
     text(s, x + 0.12, 4.66, w - 0.24, 0.72, Cp["takeaway"], size=8.5)
     # right: macro
     rx, rw = 8.02, 4.85
-    panel_header(s, rx, 1.38, rw, "Macro backdrop – what drives price and cost", None)
-    rows = [dict(cells=["", "Norway", "Sweden"], fill=NAVY, color=WHITE, bold=True, size=8, h=0.26, align={1: "c", 2: "c"})]
+    panel_header(s, rx, 1.38, rw, Mc.get("title", "Macro backdrop – what drives price and cost"), None)
+    mh = Mc.get("headers", ["", "Norway", "Sweden"])
+    wide = len(mh[2]) > 8                              # a comment column instead of a second country
+    rows = [dict(cells=mh, fill=NAVY, color=WHITE, bold=True, size=8, h=0.26, align={1: "c", 2: "l" if wide else "c"})]
     for lab, no, se in Mc["rows"]:
-        rows.append(dict(cells=[lab, no, se], size=8, h=0.3, line_bottom="E1E5EA", align={1: "c", 2: "c"}))
-    table(s, rx, 1.82, rw, rows, [2.45, 1.15, 1.25])
-    text(s, rx, 4.0, rw, 0.25, "Norway = 45% of revenue, Sweden 34%, Finland and Denmark 21% (2025).", size=7.5, italic=True, color=MUTED)
+        rows.append(dict(cells=[lab, no, se], size=8, h=0.3, line_bottom="E1E5EA", align={1: "c", 2: "l" if wide else "c"}))
+    table(s, rx, 1.82, rw, rows, [2.0, 1.0, 1.85] if wide else [2.45, 1.15, 1.25])
+    text(s, rx, 4.0, rw, 0.25, Mc.get("footnote", "Norway = 45% of revenue, Sweden 34%, Finland and Denmark 21% (2025)."), size=7.5, italic=True, color=MUTED)
     # bottom: implications
     y0 = 5.55
     panel_header(s, 0.47, y0, 12.40, "What it means for the forecast", None)

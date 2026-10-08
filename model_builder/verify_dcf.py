@@ -52,7 +52,7 @@ def forecast(mode, dm=0.0, dg=0.0):
     R_prev = sum(rev.values())
     o = {k: [] for k in ["rev", "ebit", "ebitdaal", "nopat", "capex", "fcff", "net_inv", "loc", "tax"]}
     for i in range(8):
-        opened, L_tot = 0.0, 0.0
+        opened, L_tot, newc = 0.0, 0.0, 0.0
         for s in SEG:
             k = KEY[s]
             if mode == 2:
@@ -60,7 +60,10 @@ def forecast(mode, dm=0.0, dg=0.0):
                 op = max(0.0, net)
                 loc[s] += net
                 o3, o2, o1 = opens[s]
+                meq_prev = meq[s]
                 meq[s] = meq[s] + min(0.0, net) + op * r1 + o1 * (r2 - r1) + o2 * (r3 - r2) + o3 * (1 - r3)
+                if meq_prev:
+                    newc += rev[s] * (meq[s] / meq_prev - 1)        # revenue growth from new locations (Model: g_newc)
                 opens[s] = [o2, o1, op]
                 mpl[s] *= 1 + B["lfl" + s][i] + dg
                 v = meq[s] * mpl[s]
@@ -74,10 +77,11 @@ def forecast(mode, dm=0.0, dg=0.0):
         cpi = B["cpi"][i]
         avg = (L_prev + L_tot) / 2
         loc_g = avg / avg_prev - 1
-        fix_real = (1 - C["central"]) * loc_g if mode == 2 else B["fix_real"][i]
+        grow = newc / R_prev if ex.ENGINE.get("lease_scale") == "new_revenue" else loc_g   # rent and the fixed base: store count or new-store revenue
+        fix_real = (1 - C["central"]) * grow if mode == 2 else B["fix_real"][i]
         pers_fix *= (1 + cpi) * (1 + fix_real)
         oth_fix *= (1 + cpi) * (1 + fix_real)
-        lease = lease * (1 + cpi) * (1 + loc_g) if mode == 2 else R * B["lease"][i]
+        lease = lease * (1 + cpi) * (1 + grow) if mode == 2 else R * B["lease"][i]
         costs = R * B["cogs"][i] + pers_fix + R * B["pers_var"][i] + oth_fix + R * (B["oth_var"][i] - dm) + lease
         eal = R - costs
         da = R * B["da"][i]
@@ -136,7 +140,7 @@ print("ebit adj m", [round(x, 4) for x in row("Model", "ebit_adj_m", FC)])
 print("capex     ", [round(-x) for x in xc])
 print("fcff      ", [round(x) for x in xf])
 print("roic      ", [round(x, 3) for x in row("Model", "roic", FC)])
-print("eps       ", [round(x, 2) for x in row("Model", "eps", list("HIJK") + FC)])
+print("eps       ", [round(x, 2) if isinstance(x, (int, float)) else None for x in row("Model", "eps", list("HIJK") + FC)])
 print("sanity    : return on new capital", round(cell("DCF", "s_ronic_fc"), 3), " benchmark", round(cell("DCF", "s_ronic_ref"), 3),
       " ratio", round(cell("DCF", "s_ronic_ratio"), 2))
 print("rating    :", cell("DCF", "rating"), " TP", cell("DCF", "tp"), " TSR", round(cell("DCF", "tp_tr"), 4),

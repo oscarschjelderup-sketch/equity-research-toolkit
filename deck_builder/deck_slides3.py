@@ -10,7 +10,7 @@ from deck_case import ct, CASE
 
 def _whatif():
     """The what-if runs for this case (model_builder/whatif_runs*.json written by whatif_runs.py), if present."""
-    name = os.environ.get("EQR_WHATIF") or ("whatif_runs_sats.json" if CASE == "sats_data" else "whatif_runs.json")
+    name = os.environ.get("EQR_WHATIF") or (f"whatif_runs_{CASE.replace('_data', '')}.json" if CASE != "example_data" else "whatif_runs.json")
     for folder in (os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "model_builder"), "."):
         try:
             with open(os.path.join(folder, name), encoding="utf8") as f:
@@ -406,12 +406,18 @@ def assumptions_slide(prs, d):
     line1 = (f"{pers_h[0] * 100:.1f}% of revenue in {ya3}, {pers_h[1] * 100:.1f}% in {ya}; base case {pers_f[0] * 100:.1f}% in {y1} "
              f"falling to {pers_f[1] * 100:.1f}% by {yl} as ~{d.c('Drivers', 'pers_fixsh') * 100:.0f}% of it is fixed per club.")
     wi = _whatif()
-    key = next((k for k in wi if k.startswith("Personnel ratio stays")), None)
-    paras = [("Personnel costs – the key judgement", {"bold": True, "color": NAVY, "size": 9, "space_after": 2}), (line1, {"size": 8})]
+    prefix = ct("kj_whatif_prefix", "Personnel ratio stays")
+    key = next((k for k in wi if k.startswith(prefix)), None)
+    if ct("kj_lines"):                                   # the case names its own key judgement
+        paras = [(ct("kj_title", "Key judgement"), {"bold": True, "color": NAVY, "size": 9, "space_after": 2})] + \
+                [(t, {"size": 7.5}) for t in ct("kj_lines")]
+    else:
+        paras = [("Personnel costs – the key judgement", {"bold": True, "color": NAVY, "size": 9, "space_after": 2}), (line1, {"size": 8})]
     if key and isinstance(wi[key].get("dcf"), (int, float)):
         dv = wi[key]["dcf"] - d.c("DCF", "dcf_ps")
-        paras.append((f"If the {ya} ratio persisted (all personnel costs variable): DCF NOK {wi[key]['dcf']:.0f} per share "
-                      f"({dv:+.0f}), rating {wi[key]['rating']}.", {"size": 8, "bold": True}))
+        what = f"If the {ya} ratio persisted (all personnel costs variable)" if not ct("kj_lines") else f"{key} ({ya})"
+        paras.append((f"{what}: DCF NOK {wi[key]['dcf']:.0f} per share ({dv:+.0f}), rating {wi[key]['rating']}.",
+                      {"size": 7.5 if ct("kj_lines") else 8, "bold": True}))
     panel(s, px, 5.95, pxw, 0.9, fill="FFF4D6")
     text(s, px + 0.12, 5.99, pxw - 0.24, 0.84, paras, size=8)
     text(s, rx, 5.72, rw, 0.2, "¹ History shows the total cost ratio; the fixed part (Drivers E) grows with inflation and "

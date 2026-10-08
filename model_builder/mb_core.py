@@ -12,6 +12,7 @@ OKGREEN, WARNAMB, ERRRED = "C6EFCE", "FFEB9C", "FFC7CE"
 
 HC = list("EFGHIJK")          # historical columns (7)
 FC = list("LMNOPQRS")         # forecast columns (8)
+HIST_START = 0                # index of the first history column with data (set by build_model from the case module)
 TC = "T"                      # terminal-year column
 AC = HC + FC
 NH, NF = len(HC), len(FC)
@@ -229,11 +230,16 @@ class TS:
                 put(ws, f"C{r}", d["unit"], kind="note", italic=True, align="center",
                     fill=KEYFILL if d["key_row"] else None)
                 for i, c in enumerate(HC):
-                    if d["hist"] is None or i < d["hist_from"]:
+                    if d["hist"] is None or i < d["hist_from"] + HIST_START:
                         continue
                     v = d["hist"](c, prev(c), i)
                     if v is None:
                         continue
+                    if HIST_START and isinstance(v, str) and v.startswith("="):
+                        if i == HIST_START and re.search(rf"(?<![A-Z!]){prev(c)}\d+", v):
+                            continue                      # the previous year is blank – no growth or change for the first year
+                        if not v.startswith("=IFERROR("):
+                            v = '=IFERROR(' + v[1:] + ',"")'
                     kind = "inputh" if auto_kind(v) == "input" else None
                     put(ws, f"{c}{r}", v, kind=kind, fmt=d["fmt"], bold=d["bold"], italic=d["italic"], color=tone,
                         fill=KEYFILL if d["key_row"] else None, align="right")

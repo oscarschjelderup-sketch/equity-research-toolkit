@@ -98,7 +98,7 @@ def financials(prs, d):
     pay_l, pay_p = d.row("Model", "payout", ["L", "P"])
     mcap = d.c("Inputs", "mcap")
     wacc = d.c("WACC", "wacc")
-    bullets = [
+    bullets = ct("fin_bullets")(d) if ct("fin_bullets") else [
         f"**{cagr * 100:.1f}% revenue CAGR** 2025–30E: new locations add ~{sum(gn) / 5 * 100:.1f}pp, like-for-like "
         f"~{sum(gl) / 5 * 100:.1f}pp and price/mix ~{sum(gp) / 5 * 100:.1f}pp p.a.",
         f"**Operating leverage** lifts EBIT adj. margin from {m25 * 100:.1f}% to {m30 * 100:.1f}% as fixed costs and rent grow "
@@ -112,22 +112,29 @@ def financials(prs, d):
     ]
     text(s, rx + 0.12, 1.88, rw - 0.24, 2.85, [(b, {"bullet": True, "space_after": 4}) for b in bullets], size=9)
 
-    # 5 our estimates vs. consensus
-    panel_header(s, rx, y2, rw, "Our estimates vs. consensus", 5)
-    yrs3 = d.years(FC[:3])
-    crows = [dict(cells=["vs. consensus"] + yrs3, fill=NAVY, color=WHITE, bold=True, size=8.5, h=0.25,
-                  align={1: "c", 2: "c", 3: "c"})]
-    for m, lab in [("rev", "Revenue"), ("ebitda", "EBITDA"), ("ebit", "EBIT"), ("eps", "EPS")]:
-        diffs = [d.c("Consensus", f"diff_{m}_{y}") for y in (1, 2, 3)]
-        dtxt = [f"{v * 100:+.1f}%" if isinstance(v, (int, float)) else "n.a." for v in diffs]     # no consensus for the year
-        diffs = [v if isinstance(v, (int, float)) else 0.0 for v in diffs]
-        crows.append(dict(cells=[lab] + dtxt, size=8.5, h=0.235, line_bottom="DDE1E5",
-                          align={1: "c", 2: "c", 3: "c"}, bolds={j: m in ("ebit", "eps") for j in range(4)},
-                          colors={j + 1: (GREEN if v > 0.005 else RED if v < -0.005 else DARK) for j, v in enumerate(diffs)}))
-    table(s, rx, y2 + 0.45, rw, crows, [1.2, 0.9, 0.9, 0.9])
-    vt, vo, vc = (d.c("Consensus", f"vp1_{k}") for k in ("topic", "ours", "cons"))
-    text(s, rx, y2 + 1.68, rw, 0.55, [(f"**Where we differ – {vt.lower()}.** Consensus: {vc.rstrip('.')}. "
-                                      f"We: {vo.rstrip('.')}.", {})], size=7.5, color=DARK)
+    # 5 our estimates vs. consensus (or vs. the company's targets when there is no consensus)
+    panel_header(s, rx, y2, rw, ct("fin_panel5", "Our estimates vs. consensus"), 5)
+    if ct("targets_box"):
+        trows = [dict(cells=["", "Ours", "Company"], fill=NAVY, color=WHITE, bold=True, size=8.5, h=0.25, align={1: "c", 2: "c"})]
+        for lab, ours, tgt in ct("targets_box")(d):
+            trows.append(dict(cells=[lab, ours, tgt], size=8, h=0.235, line_bottom="DDE1E5", align={1: "c", 2: "c"}, bolds={0: True}))
+        table(s, rx, y2 + 0.45, rw, trows, [1.35, 1.3, 1.25])
+        text(s, rx, y2 + 1.68, rw, 0.6, [(ct("fin_differ", ""), {})], size=7.5, color=DARK)
+    else:
+        yrs3 = d.years(FC[:3])
+        crows = [dict(cells=["vs. consensus"] + yrs3, fill=NAVY, color=WHITE, bold=True, size=8.5, h=0.25,
+                      align={1: "c", 2: "c", 3: "c"})]
+        for m, lab in [("rev", "Revenue"), ("ebitda", "EBITDA"), ("ebit", "EBIT"), ("eps", "EPS")]:
+            diffs = [d.c("Consensus", f"diff_{m}_{y}") for y in (1, 2, 3)]
+            dtxt = [f"{v * 100:+.1f}%" if isinstance(v, (int, float)) else "n.a." for v in diffs]     # no consensus for the year
+            diffs = [v if isinstance(v, (int, float)) else 0.0 for v in diffs]
+            crows.append(dict(cells=[lab] + dtxt, size=8.5, h=0.235, line_bottom="DDE1E5",
+                              align={1: "c", 2: "c", 3: "c"}, bolds={j: m in ("ebit", "eps") for j in range(4)},
+                              colors={j + 1: (GREEN if v > 0.005 else RED if v < -0.005 else DARK) for j, v in enumerate(diffs)}))
+        table(s, rx, y2 + 0.45, rw, crows, [1.2, 0.9, 0.9, 0.9])
+        vt, vo, vc = (d.c("Consensus", f"vp1_{k}") for k in ("topic", "ours", "cons"))
+        text(s, rx, y2 + 1.68, rw, 0.55, [(f"**Where we differ – {vt.lower()}.** Consensus: {vc.rstrip('.')}. "
+                                          f"We: {vo.rstrip('.')}.", {})], size=7.5, color=DARK)
     notes(s, "TEMPLATE: Keep the heading 'Financials and estimates'. Tables and charts are generated from the model – "
              "re-run the deck builder or copy from the Deck_Feed sheet after changing the model.\n\n"
              "TALKING POINTS: (1) History proves the model works. (2) Growth from new locations, like-for-like and price. "
@@ -224,7 +231,7 @@ def valuation(prs, d):
     if isinstance(m_imp, (int, float)):
         rel = "below" if m_imp < m_ref else "above"
         take = (f"Our take: at NOK {price:.0f} the market prices in an EBIT margin of **{m_imp * 100:.1f}%** in {yl} – {rel} the "
-                f"{m_ref * 100:.1f}% {comp} earns today. We see **{m_our * 100:.1f}%** as fixed costs are spread over more locations. "
+                f"{m_ref * 100:.1f}% {comp} earns today. We see **{m_our * 100:.1f}%** {ct('take_reason', 'as fixed costs are spread over more locations')}. "
                 f"DCF NOK {dcf:.0f} and peers NOK {peer:.0f} both point higher: **12-month target price NOK {tp:.0f}**(1), **{rating}**.")
     else:
         take = (f"Our take: {comp} is a **high-quality compounder** trading at a **discount to peers**. Our DCF (NOK {dcf:.0f}) "
@@ -241,11 +248,11 @@ def valuation(prs, d):
     bear_ps = d.v("Sensitivity", f"{t4['dcf_ps']}{sr0}")
     bull_ps = d.v("Sensitivity", f"{t4['dcf_ps']}{sr1}")
     thesis = [
-        (ct("thesis_quality", "").format(m_imp=m_imp * 100, m_our=m_our * 100, yl=yl)
+        (ct("thesis_quality", "").format(m_imp=m_imp * 100, m_our=m_our * 100, yl=yl, price=d.c("Inputs", "price"))
          if ct("thesis_quality") and isinstance(m_imp, (int, float)) else f"**Quality at a discount:** trades at {mult(d.row('Model', 'evebit', ['M'])[0])} 2027E EV/EBIT, "
         f"{abs(ev_ebit_disc) * 100:.0f}% below peers despite higher margins"),
         ct("thesis_growth", "**Growth engine intact:** new locations, like-for-like and pricing all contribute; bolt-on M&A is upside"),
-        f"**Cash machine:** FCF yield rising to {d.row('Model', 'fcf_yield', ['O'])[0] * 100:.0f}% by 2029E funds rising dividends",
+        ct("thesis_cash") or f"**Cash machine:** FCF yield rising to {d.row('Model', 'fcf_yield', ['O'])[0] * 100:.0f}% by 2029E funds rising dividends",
         f"**Asymmetric risk/reward:** bull NOK {bull_ps:.0f} vs. bear NOK {bear_ps:.0f} per share (DCF)",
         ct("thesis_catalysts", "**Catalysts:** next quarterly report (price increases), capital markets day, bolt-on M&A"),
     ]

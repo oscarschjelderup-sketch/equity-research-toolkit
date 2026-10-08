@@ -76,7 +76,7 @@ def _model_spec():
           hist=m("{rev_a}+{rev_b}+{rev_c}"), fc=m("{rev_a}+{rev_b}+{rev_c}"))
     t.row("grev", "Revenue growth", "%", fmt=F_PCT, italic=True, hist_from=1,
           hist=m("{rev}/[rev]-1"), fc=m("{rev}/[rev]-1"))
-    vc = "([rev_a]*{gvol_a}+[rev_b]*{gvol_b}+[rev_c]*{gvol_c})/[rev]"
+    vc = "([rev_a]*N({gvol_a})+[rev_b]*N({gvol_b})+[rev_c]*N({gvol_c}))/[rev]"      # N(): a segment starting from zero has no growth rate
     t.row("g_volc", "– of which volume", "%", fmt=F_PCT, italic=True, indent=1, hist_from=1, hist=m(vc), fc=m(vc))
     cap = lambda k: "(" + "+".join(f"IF([{k}_{x}]=0,0,[rev_{x}]*({{{k}_{x}}}/[{k}_{x}]-1))" for x in "abc") + ")/[rev]"
     t.row("g_newc", "of which new locations (capacity)", "%", fmt=F_PCT, italic=True, indent=2, hist_from=1,
@@ -112,9 +112,13 @@ def _model_spec():
           hist=m("{gp}+{pers}+{oth}"), fc=m("{gp}+{pers}+{oth}"))
     t.row("ebitda_m", "EBITDA margin", "%", fmt=F_PCT, italic=True, hist=m("{ebitda}/{is_rev}"), fc=m("{ebitda}/{is_rev}"))
     t.blank()
+    # location mode: rent grows with cost inflation and the store count – or, for chains with stores of very different
+    # sizes (ENGINE['lease_scale'] = 'new_revenue'), with the revenue the new locations add
+    _grow = "{g_newc}" if ex.ENGINE.get("lease_scale") == "new_revenue" else "{loc_g}"
     t.row("lease", "Lease payments (IFRS 16 adjustment)", "NOKm", hist=HL("lease_pay"),
-          fc=m("IF(@rev_mode=2,[lease]*(1+<cpi>)*(1+{loc_g}),-{is_rev}*<lease>)"),
-          note="Rent. Location mode: rent per location grows with cost inflation; segment mode: % of revenue. An operating cost in the DCF")
+          fc=m("IF(@rev_mode=2,[lease]*(1+<cpi>)*(1+" + _grow + "),-{is_rev}*<lease>)"),
+          note="Rent. Location mode: rent grows with cost inflation and " + ("the revenue added by new locations" if _grow == "{g_newc}" else "the number of locations")
+               + "; segment mode: % of revenue. An operating cost in the DCF")
     t.row("ebitdaal", "EBITDAaL (pre-IFRS 16)", "NOKm", bold=True, line=True,
           hist=m("{ebitda}+{lease}"), fc=m("{ebitda}+{lease}"))
     t.row("ebitdaal_m", "EBITDAaL margin", "%", fmt=F_PCT, italic=True,

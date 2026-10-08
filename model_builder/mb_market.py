@@ -11,6 +11,7 @@ from openpyxl.chart import LineChart, Reference
 from openpyxl.formatting.rule import CellIsRule
 from openpyxl.worksheet.datavalidation import DataValidation
 from mb_core import *
+import mb_core as _mb_core
 from mb_val import SENS, T5_STEPS, _sens_value_formula, t4_col
 import case_data as ex
 
@@ -116,7 +117,8 @@ def write_reverse_dcf(wb):
          f"=AVERAGE({m_rng})", f"=AVERAGE(Model!${HC[-3]}${rm}:${HC[-1]}${rm})", "Average of the last three actual years", F_PCT),
         ("cagr", f'="Revenue CAGR, "&{YR(HC[-1])}&"–"&{YR(FC[-1])}', f"=C{GS_ROW + 5}",
          f"=({MS('is_rev', FC[-1])}/{MS('is_rev', HC[-1])})^(1/{NF})-1",
-         f"=({MS('is_rev', HC[-1])}/{MS('is_rev', HC[-4])})^(1/3)-1", "CAGR over the last three actual years", F_PCT),
+         f"=IFERROR(({MS('is_rev', HC[-1])}/{MS('is_rev', HC[max(3, _mb_core.HIST_START)])})^(1/{6 - max(3, _mb_core.HIST_START)})-1,\"\")",
+         f"CAGR over the last {6 - max(3, _mb_core.HIST_START)} actual years", F_PCT),
         ("m_at_g", "… EBIT adj. margin in the final year at that growth", f"=C{GS_ROW + 6}",
          f"={MS('ebit_adj_m', FC[-1])}", None, "Less growth means less operating leverage", F_PCT),
         ("wacc", "WACC", f"=C{wres}", f"={S('WACC', 'wacc')}", None, "All other assumptions unchanged", F_PCT2),

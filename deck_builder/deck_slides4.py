@@ -3,6 +3,7 @@ from pptx.enum.chart import XL_MARKER_STYLE
 from deck_core import *
 from deck_data import num, pct, mult, HC, FC
 from deck_slides1 import std
+from deck_case import ct
 
 MLABEL = {"rev": "Revenue", "ebitda": "EBITDA", "ebit": "EBIT", "eps": "EPS", "dps": "DPS"}
 STATUS_FILL = {"ON TRACK": "C6EFCE", "WATCH": "FFEB9C", "BROKEN": "FFC7CE", "OK": "C6EFCE", "INCONSISTENT": "FFC7CE"}
@@ -25,7 +26,7 @@ def reverse_dcf_slide(prs, d):
     R = lambda k: d.c("Reverse_DCF", k)
     price, dcf = d.c("Inputs", "price"), d.c("DCF", "dcf_ps")
     yl, ya = d.years([FC[-1]])[0], d.years([HC[-1]])[0]
-    ya3 = d.years([HC[-4]])[0]
+    ya3 = d.years([HC[max(3, ct("hist_first", 0))]])[0]
     m_imp, m_our, m_ref = R("rd_m_last"), R("rd_m_last_ours"), R("rd_m_last_ref")
     rel = "below" if _isnum(m_imp) and m_imp < m_ref else "above"
     s = std(prs, "Appendix #4.2", "What the market is pricing in",
@@ -231,7 +232,7 @@ def growth_engine_slide(prs, d):
             "Sources: Case team estimates (Excel model, Model and Drivers sheets – location mode). New locations ramp up over "
             "three years; fixed costs and rent grow with inflation and the number of locations. Figures are illustrative.")
     # left: growth decomposition
-    gcols = HC[3:] + FC[:5]
+    gcols = HC[max(3, ct("hist_first", 0)):] + FC[:5]
     panel_header(s, 0.47, 1.38, 6.1, "Revenue growth by source", None)
     gf = add_chart(s, XL_CHART_TYPE.COLUMN_STACKED, 0.47, 1.80, 6.1, 2.35, d.years(gcols),
                    [("New locations", d.row("Model", "g_newc", gcols)), ("Like-for-like volume", d.row("Model", "g_lflc", gcols)),
@@ -239,13 +240,13 @@ def growth_engine_slide(prs, d):
                    num_fmt="0%", label_pos=XL_LABEL_POSITION.CENTER, gap=45, overlap=100, label_color=WHITE)
     series_labels_off(gf.chart, 1)
     # right: locations and revenue per location
-    lcols = HC[1:] + FC[:5]
+    lcols = HC[max(1, ct("hist_first", 0)):] + FC[:5]
     panel_header(s, 6.77, 1.38, 6.1, "Locations (year end) and revenue per location (NOKm)", None)
     gf2 = add_chart(s, XL_CHART_TYPE.COLUMN_CLUSTERED, 6.77, 1.80, 6.1, 2.35, d.years(lcols),
-                    [("Locations", d.row("Model", "loc", lcols)), ("Revenue per average location (rhs)", d.row("Model", "rev_loc", lcols))],
+                    [("Locations", d.row("Model", "loc", lcols)), ("Revenue per average location (rhs)", [v if _isnum(v) else None for v in d.row("Model", "rev_loc", lcols)])],
                     [LBLUE, NAVY], size=7.5, legend="t", labels=True, num_fmt="0", label_pos=XL_LABEL_POSITION.INSIDE_END,
                     gap=40, val_min=0, val_max=max(d.row("Model", "loc", lcols)) * 1.45, label_color=NAVY)
-    _rl = d.row("Model", "rev_loc", lcols)
+    _rl = [v for v in d.row("Model", "rev_loc", lcols) if _isnum(v)]      # the first history year has no average-location figure
     _rg = (max(_rl) - min(_rl)) or 1.0            # keep the line in the band above the columns (no label collisions)
     to_combo(gf2.chart, 1, color=NAVY, fmt="0", size=7.5, val_min=min(_rl) - 4 * _rg, val_max=max(_rl) + 0.56 * _rg)
     # bottom: location economics
