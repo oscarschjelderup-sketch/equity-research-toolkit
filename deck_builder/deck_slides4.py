@@ -240,6 +240,8 @@ def growth_engine_slide(prs, d):
                     ("Price/mix", d.row("Model", "g_pxc", gcols))], [NAVY, MIDBLUE, LBLUE], size=7.5, legend="t", labels=True,
                    num_fmt="0%", label_pos=XL_LABEL_POSITION.CENTER, gap=45, overlap=100, label_color=WHITE)
     series_labels_off(gf.chart, 1)
+    hide_small_labels(gf.chart, 0)
+    hide_small_labels(gf.chart, 2)
     # right: locations and revenue per location
     lcols = HC[max(1, ct("hist_first", 0)):] + FC[:5]
     panel_header(s, 6.77, 1.38, 6.1, "Locations (year end) and revenue per location (NOKm)", None)

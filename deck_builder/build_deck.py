@@ -51,12 +51,13 @@ d = ModelData(model, map_path)
 # outlet_deck.py: store_econ, targets, market_retail)
 case_slides = {s6.unit_economics_slide: "unit", s6.cash_slide: None, s6.competition_macro_slide: "comp",
                s7.store_economics_slide: "store_econ", s7.targets_slide: "targets", s7.cash_slide_retail: "store_econ",
-               s7.sotp_slide: "sotp", s7.margin_bridge_slide: "margin_slide"}
+               s7.sotp_slide: "sotp", s7.margin_bridge_slide: "margin_slide", s7.financial_analysis_slide: "fin_analysis",
+               s7.capital_allocation_slide: "cap_alloc"}
 s1.APPX["n"] = 0                     # appendix slides are numbered in build order
 for fn in (s1.cover, s1.team, s1.company_overview, s1.market_overview, s2.financials, s2.valuation,
            s3.divider, s3.dcf_slide, s4.reverse_dcf_slide, s7.sotp_slide, s3.scenario_slide, s4.thesis_slide, s4.consensus_slide,
            s7.targets_slide, s4.growth_engine_slide, s6.unit_economics_slide, s7.store_economics_slide, s7.margin_bridge_slide,
-           s6.cash_slide, s7.cash_slide_retail,
+           s7.financial_analysis_slide, s6.cash_slide, s7.cash_slide_retail, s7.capital_allocation_slide,
            s3.peers_slide, s3.assumptions_slide, s6.competition_macro_slide, s3.risks_slide, s3.guide_slide):
     if fn is s3.guide_slide and ct("skip_guide"):      # a case deck does not need the template guide
         continue

@@ -486,6 +486,16 @@ def add_chart(slide, ctype, x, y, w, h, cats, series, colors, size=8, legend=Non
     return gf
 
 
+def hide_small_labels(chart, series_idx, thr=0.005):
+    """Blank the data labels of points whose absolute value is below thr (a '0%' sitting on the axis is noise)."""
+    s = chart.plots[0].series[series_idx]
+    for i, v in enumerate(s.values):
+        if v is not None and abs(v) < thr:
+            dl = s.points[i].data_label
+            dl.has_text_frame = True
+            dl.text_frame.text = ""
+
+
 def color_points(chart, colors, series_idx=0):
     s = chart.plots[0].series[series_idx]
     for i, col in enumerate(colors):

@@ -43,10 +43,10 @@ the same folder. The folder is git-ignored; without it (or with `EQR_TEAM=none`)
 | `deck_slides3.py` (assumptions) | reads the personnel-cost what-if from `model_builder/whatif_runs*.json` when it exists |
 | `deck_slides5.py` | Market overview from company KPIs and sourced facts (used when the case text module has `market`) |
 | `deck_slides6.py` | Club economics (company guidance vs. the model), revenue-to-cash bridge and capital allocation, competition and macro (case module keys `unit`, `comp`, `macro`) |
-| `retail_slides.py` | Store-chain cases (case module keys `market_retail`, `store_econ`, `targets`, `sotp`, `margin_slide`): market overview, store economics, company targets in place of consensus, sum-of-the-parts of the estate and the roll-out (`model_builder/sotp_runs.py`), margin bridge with inventory vs. peers and the latest half-year, sources and uses of cash |
+| `retail_slides.py` | Store-chain cases (case module keys `market_retail`, `store_econ`, `targets`, `sotp`, `margin_slide`): market overview, store economics, company targets in place of consensus, sum-of-the-parts of the estate and the roll-out (`model_builder/sotp_runs.py`), financial analysis (ROIC tree, working-capital cycle, cash conversion; key `fin_analysis`), capital allocation and financing (returns on a new location vs. the cost of capital, self-funded growth, financing menu; key `cap_alloc`), margin bridge with inventory vs. peers and the latest half-year, sources and uses of cash |
 | `deck_case.py`, `sats_deck.py` | Case text selection; the SATS text |
 
-Optional case keys read by the generic slides: `ipo_price` (football-field marker), `peer_scatter` (EV/EBIT vs. growth with a peer regression instead of the bar chart), `peers_subtitle`, `risk_subtitle`, `growth_subtitle`, `growth_sources`, `cash_why`. Appendix slides are numbered in build order.
+Optional case keys read by the generic slides: `ipo_price` (football-field marker), `peer_scatter` (EV/EBIT vs. growth with a peer regression instead of the bar chart), `peers_subtitle`, `risk_subtitle`, `growth_subtitle`, `growth_sources`, `cash_why`, `assump_skip` (driver rows to leave out), `kj_size`. Appendix slides are numbered in build order; growth-decomposition labels below 0.5% are blanked and scatter labels that would overlap are placed above/below.
 | `cl_a1-a3.py`, `cl_b1-b2.py` | The chart library (#1–#9) and the frameworks (#1–#10) |
 
 ```bash

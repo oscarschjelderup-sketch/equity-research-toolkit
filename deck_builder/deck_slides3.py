@@ -339,8 +339,16 @@ def _peer_scatter(s, d, x, by, comp, V, cr, names):
     ylim = (0, max(ally) * 1.18)
     box = (x, by + 0.42, 6.1, 1.45)
     plot = (0.10, 0.06, 0.86, 0.66)
+    from pptx.enum.chart import XL_LABEL_POSITION as _LP
+    positions, placed = {}, []
+    for name, px_, py_ in sorted(pts, key=lambda p: (p[1], p[2])):      # near-duplicates: one label above, one below
+        near = [n_ for a, b, n_ in placed if abs(px_ - a) < 0.07 * (xlim[1] - xlim[0]) and abs(py_ - b) < 0.10 * (ylim[1] - ylim[0])]
+        if near:
+            positions[near[0]] = _LP.ABOVE
+            positions[name] = _LP.BELOW
+        placed.append((px_, py_, name))
     scatter(s, box, pts + [(comp, cx, cy)], xfmt="0%", yfmt='0"x"', xtitle=PS.get("xtitle", f"Revenue growth {yr} (consensus)"),
-            ytitle=f"EV/EBIT {yr}", highlight=comp, xlim=xlim, ylim=ylim, size=7.5, trend=False, plot=plot)
+            ytitle=f"EV/EBIT {yr}", highlight=comp, xlim=xlim, ylim=ylim, size=7.5, trend=False, plot=plot, positions=positions)
     bx, byy, bw, bh = box
     PX = lambda v: bx + (plot[0] + plot[2] * (v - xlim[0]) / (xlim[1] - xlim[0])) * bw
     PY = lambda v: byy + (plot[1] + plot[3] * (1 - (v - ylim[0]) / (ylim[1] - ylim[0]))) * bh
@@ -348,7 +356,7 @@ def _peer_scatter(s, d, x, by, comp, V, cr, names):
     line(s, PX(x0), PY(alpha + beta * x0), PX(x1), PY(alpha + beta * x1), color=MUTED, width=1, dash=MSO_LINE_DASH_STYLE.DASH)
     circle(s, PX(cx) - 0.07, PY(imp) - 0.07, 0.14, fill=WHITE, line_col=NAVY)
     text(s, PX(cx) + 0.1, PY(imp) - 0.1, 1.4, 0.2, f"regression {imp:.1f}x", size=7, italic=True, color=NAVY)
-    text(s, bx + 0.75, byy + 0.02, 1.25, 0.18, f"Peers: R² = {r2:.2f}", size=7.5, italic=True, color=MUTED, align="l")
+    text(s, bx + 1.7, byy - 0.02, 1.25, 0.18, f"Peers: R² = {r2:.2f}", size=7.5, italic=True, color=MUTED, align="l")
     r = cr["evebit"]
     metric, med_m, med_v, shares = V("C", r), V("E", r), V("H", r), d.c("DCF", "shares")
     bridge_ps = med_v - med_m * metric / shares          # (EV -> equity) per share, implied by the median row
@@ -426,7 +434,10 @@ def assumptions_slide(prs, d):
                         ("Other opex, variable (% of rev.)¹", "b_oth_var")] + cost_spec + [("D&A (owned assets)", "b_da"),
                         ("Investments and other", None)] + inv_spec + [("NWC (% of revenue)", "b_nwc"), ("Tax rate", "b_tax"),
                         ("Dividend payout ratio", "b_payout")])
+    skip = set(ct("assump_skip", []))                      # e.g. like-for-like rows that are zero by construction
     for lab, key in spec:
+        if key in skip:
+            continue
         if key is None:
             rows.append(dict(cells=[lab] + [""] * 9, bold=True, color=NAVY, size=7.5, h=0.18, line_bottom=NAVY))
             continue
@@ -460,14 +471,14 @@ def assumptions_slide(prs, d):
     key = next((k for k in wi if k.startswith(prefix)), None)
     if ct("kj_lines"):                                   # the case names its own key judgement
         paras = [(ct("kj_title", "Key judgement"), {"bold": True, "color": NAVY, "size": 9, "space_after": 2})] + \
-                [(t, {"size": 7.5}) for t in ct("kj_lines")]
+                [(t, {"size": ct("kj_size", 7.5)}) for t in ct("kj_lines")]
     else:
         paras = [("Personnel costs – the key judgement", {"bold": True, "color": NAVY, "size": 9, "space_after": 2}), (line1, {"size": 8})]
     if key and isinstance(wi[key].get("dcf"), (int, float)):
         dv = wi[key]["dcf"] - d.c("DCF", "dcf_ps")
         what = f"If the {ya} ratio persisted (all personnel costs variable)" if not ct("kj_lines") else f"{key} ({ya})"
         paras.append((f"{what}: DCF NOK {wi[key]['dcf']:.0f} per share ({dv:+.0f}), rating {wi[key]['rating']}.",
-                      {"size": 7.5 if ct("kj_lines") else 8, "bold": True}))
+                      {"size": ct("kj_size", 7.5) if ct("kj_lines") else 8, "bold": True}))
     panel(s, px, 5.95, pxw, 0.9, fill="FFF4D6")
     text(s, px + 0.12, 5.99, pxw - 0.24, 0.84, paras, size=8)
     text(s, rx, 5.72, rw, 0.2, "¹ History shows the total cost ratio; the fixed part (Drivers E) grows with inflation and "

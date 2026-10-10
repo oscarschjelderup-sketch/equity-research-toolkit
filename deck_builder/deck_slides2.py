@@ -63,6 +63,8 @@ def financials(prs, d):
                     [NAVY, MIDBLUE, LBLUE], size=7, legend="t", labels=True, num_fmt="0%",
                     label_pos=XL_LABEL_POSITION.CENTER, gap=45, overlap=100, label_color=WHITE)
     series_labels_off(gfg.chart, 1)
+    hide_small_labels(gfg.chart, 0)
+    hide_small_labels(gfg.chart, 2)
     # 3 scenario revenue paths
     panel_header(s, 4.72, y2, 4.0, "Revenue by scenario (NOKm)", 3)
     last = d.row("Model", "is_rev", ["K"])[0]

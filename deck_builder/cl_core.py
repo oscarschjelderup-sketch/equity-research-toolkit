@@ -105,8 +105,9 @@ def waterfall(s, box, steps, fmt="{:,.0f}", size=8, vmax=None, colors=(NAVY, GRE
 
 
 def scatter(s, box, points, xfmt="0%", yfmt='0.0"x"', xtitle="", ytitle="", xlim=None, ylim=None, size=8,
-            highlight=None, trend=True, plot=(0.10, 0.05, 0.86, 0.74)):
-    """points: [(name, x, y)]. highlight = name drawn in a different colour."""
+            highlight=None, trend=True, plot=(0.10, 0.05, 0.86, 0.74), positions=None):
+    """points: [(name, x, y)]. highlight = name drawn in a different colour. positions: {name: XL_LABEL_POSITION} for
+    labels that would otherwise overlap (default RIGHT)."""
     x, y, w, h = box
     cd = XyChartData()
     a = cd.add_series("Peers")
@@ -128,7 +129,7 @@ def scatter(s, box, points, xfmt="0%", yfmt='0.0"x"', xtitle="", ytitle="", xlim
         srs.format.line.fill.background()
         for i, p in enumerate(names[k]):
             dl = srs.points[i].data_label
-            dl.position = XL_LABEL_POSITION.RIGHT
+            dl.position = (positions or {}).get(p[0], XL_LABEL_POSITION.RIGHT)
             tf = dl.text_frame
             tf.text = p[0]
             r = tf.paragraphs[0].runs[0]

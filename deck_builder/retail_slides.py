@@ -408,16 +408,12 @@ def margin_bridge_slide(prs, d):
     rx, rw = 6.77, 6.1
     panel_header(s, rx, 1.38, rw, M.get("inv_title", "Inventory in % of revenue – latest balance sheet vs. listed peers"), None)
     comp = d.c("Inputs", "company").split(" ASA")[0]
-    cats = [f"{comp} ({ya})"] + [n for n, _ in peers]
-    vals = [inv_co] + [v for _, v in peers]
+    cats = [f"{comp} ({ya})"] + [n for n, _ in peers] + ["Peer median"]
+    vals = [inv_co] + [v for _, v in peers] + [med]
     gf = add_chart(s, XL_CHART_TYPE.COLUMN_CLUSTERED, rx, 1.80, rw, 2.25, cats, [("Inventory / revenue", vals)], [LBLUE], size=7.5,
                    labels=True, num_fmt="0%", label_pos=XL_LABEL_POSITION.OUTSIDE_END, gap=45, val_min=0, val_max=max(vals) * 1.25)
-    color_points(gf.chart, [NAVY] + [LBLUE] * len(peers))
-    px_, py_, pw_, ph_ = 0.02, 0.05, 0.96, 0.70
-    manual_plot_layout(gf.chart, px_, py_, pw_, ph_)
-    ymed = 1.80 + (py_ + ph_ * (1 - med / (max(vals) * 1.25))) * 2.25
-    line(s, rx + px_ * rw, ymed, rx + (px_ + pw_) * rw, ymed, color=DARK, width=1, dash=MSO_LINE_DASH_STYLE.DASH)
-    text(s, rx + rw - 1.7, ymed - 0.40, 1.65, 0.2, f"Peer median {med * 100:.0f}%", size=8, bold=True, align="r")
+    color_points(gf.chart, [NAVY] + [LBLUE] * len(peers) + [MIDBLUE])
+    manual_plot_layout(gf.chart, 0.02, 0.05, 0.96, 0.70)
     text(s, rx, 4.08, rw, 0.36, M.get("inv_note", ""), size=7, italic=True, color=MUTED)
     # bottom: the latest half-year against our full-year estimate
     I = M["interim"]
@@ -458,4 +454,157 @@ def margin_bridge_slide(prs, d):
     notes(s, "TALKING POINT: the bridge shows where the margin comes from (gross margin and rent leverage) and what it costs "
              "(D&A on the warehouse). The inventory chart is the price of the own-brand model. The half-year table anchors the "
              "first forecast year on the only post-prospectus data point.")
+    return s
+
+
+# ------------------------------------------------------------------ financial analysis: returns, working capital, earnings quality
+def financial_analysis_slide(prs, d):
+    """Return on capital (NOPAT margin x capital turnover), the working-capital cycle and cash conversion – the
+    accounting-and-financial-analysis reading of the statements."""
+    F = ct("fin_analysis")
+    hc = [c for c, v in zip(HC, d.row("Hist", "rev", HC)) if _isnum(v)]
+    wacc = d.c("WACC", "wacc")
+    cols = hc[-2:] + [FC[0], FC[2], FC[4], FC[7]]
+    yrs = d.years(cols)
+    rev = d.row("Model", "is_rev", cols)
+    nopat = d.row("Model", "nopat", cols)
+    roic = d.row("Model", "roic", cols)
+    ok = [all(_isnum(v) and v for v in t) for t in zip(rev, nopat, roic)]
+    ic = [n / r if o else None for n, r, o in zip(nopat, roic, ok)]
+    marg = [n / v if o else None for n, v, o in zip(nopat, rev, ok)]
+    turn = [v / i if o else None for v, i, o in zip(rev, ic, ok)]
+    ep = [(r - wacc) * i if o else None for r, i, o in zip(roic, ic, ok)]
+    # working capital days (history, plus an LTM point from the case module)
+    inv, cogs, pay, rec, hrev = (d.row("Hist", k, hc) for k in ("inv", "cogs", "pay", "rec", "rev"))
+    dio = [i / -c * 365 for i, c in zip(inv, cogs)]
+    dpo = [p_ / -c * 365 for p_, c in zip(pay, cogs)]
+    dro = [r_ / v * 365 for r_, v in zip(rec, hrev)]
+    ccc = [a + b - c for a, b, c in zip(dio, dro, dpo)]
+    wc_cats = d.years(hc)
+    L = F.get("ltm")
+    if L:
+        wc_cats = wc_cats + [L["label"]]
+        dio = dio + [L["inv"] / L["cogs"] * 365]
+        dpo = dpo + [(L["pay"] / L["cogs"] * 365) if L.get("pay") else dpo[-1]]
+        dro = dro + [(L["rec"] / L["rev"] * 365) if L.get("rec") else dro[-1]]
+        ccc = ccc + [dio[-1] + dro[-1] - dpo[-1]]
+    # earnings quality (history)
+    ebitda, cfo, lp, capex, div = (d.row("Hist", k, hc) for k in ("ebitda", "cfo", "lease_pay", "capex", "div_paid"))
+    conv = [c / e for c, e in zip(cfo, ebitda)]
+    fcf = [c + l_ + k for c, l_, k in zip(cfo, lp, capex)]
+    ya = d.years([hc[-1]])[0]
+    nums = dict(roic25=roic[1] * 100, ep25=ep[1], ep30=ep[4], ep33=ep[5], turn25=turn[1], marg25=marg[1] * 100, dio25=dio[len(hc) - 1],
+                dpo25=dpo[len(hc) - 1], ccc25=ccc[len(hc) - 1], dio_ltm=dio[-1], conv24=conv[-2] * 100, conv25=conv[-1] * 100,
+                fcf25=fcf[-1], inv25=inv[-1], day_value=-cogs[-1] / 365, wacc=wacc * 100, ic25=ic[1], roic30=roic[4] * 100)
+    s = std(prs, "Appendix #4.10", F.get("title", "Financial analysis – returns, working capital and earnings quality"),
+            (F.get("subtitle") or "ROIC {roic25:.0f}% on capital that is mostly stock: {dio25:.0f} days of inventory at cost; cash "
+                                  "conversion {conv25:.0f}% of EBITDA – the balance sheet is the business model").format(**nums),
+            F["sources"])
+    # 1 returns table
+    x, w = 0.47, 6.1
+    panel_header(s, x, 1.38, w, "Return on capital – is there a competitive advantage?", None)
+    f_pct = lambda v: "–" if v is None else f"{v * 100:.1f}%"
+    rows = [_hdr([""] + yrs, h=0.26, size=8)]
+    spec = [("NOPAT margin", marg, f_pct, False), ("Invested capital turnover (x)", turn, lambda v: "–" if v is None else f"{v:.2f}x", False),
+            ("ROIC (NOPAT / invested capital)", roic, f_pct, True), ("WACC", [wacc] * 6, f_pct, False),
+            ("Spread", [(r - wacc) if o else None for r, o in zip(roic, ok)], lambda v: "–" if v is None else f"{v * 100:+.1f}pp", False),
+            ("Economic profit (NOKm)", ep, lambda v: "–" if v is None else f"{v:,.0f}", True)]
+    for lab, vals, f_, bold in spec:
+        rows.append(dict(cells=[lab] + [f_(v) for v in vals], size=8.5, h=0.235, line_bottom="E1E5EA", bolds={0: bold},
+                         align={j: "c" for j in range(1, 7)}, fills={1: "F2F3F5", 2: "F2F3F5"}))
+    table(s, x, 1.82, w, rows, [2.2] + [0.65] * 6)
+    text(s, x, 3.55, w, 0.5, F.get("returns_note", "Invested capital = equity + minorities + net debt (ex leases). Economic profit = (ROIC – WACC) x "
+                                                  "invested capital: the value the business adds in a year beyond its cost of capital."),
+         size=7, italic=True, color=MUTED)
+    # 2 working capital cycle
+    rx, rw = 6.77, 6.1
+    panel_header(s, rx, 1.38, rw, "Working-capital cycle (days)", None)
+    gf = add_chart(s, XL_CHART_TYPE.COLUMN_CLUSTERED, rx, 1.80, rw, 2.0, wc_cats,
+                   [("Inventory days (on COGS)", dio), ("Payable days", dpo), ("Cash conversion cycle", ccc)], [NAVY, LBLUE, MIDBLUE],
+                   size=7.5, legend="t", labels=True, num_fmt="0", label_pos=XL_LABEL_POSITION.OUTSIDE_END, gap=60, overlap=-10,
+                   val_min=0, val_max=max(dio) * 1.25)
+    text(s, rx, 3.82, rw, 0.5, F.get("wc_note", "").format(**nums), size=7, italic=True, color=MUTED)
+    # 3 earnings quality
+    y0 = 4.42
+    panel_header(s, x, y0, w, "Earnings quality – from EBITDA to cash (NOKm)", None)
+    rows = [_hdr([""] + d.years(hc), h=0.26, size=8)]
+    spec = [("EBITDA (IFRS 16)", ebitda, lambda v: f"{v:,.0f}", True), ("Cash flow from operations (reported)", cfo, lambda v: f"{v:,.0f}", False),
+            ("CFO / EBITDA", conv, lambda v: f"{v * 100:.0f}%", True), ("Lease payments", lp, lambda v: f"{v:,.0f}", False),
+            ("Capex", capex, lambda v: f"{v:,.0f}", False), ("Free cash flow after leases and capex", fcf, lambda v: f"{v:,.0f}", True),
+            ("Dividends paid", div, lambda v: f"{v:,.0f}", False)]
+    for lab, vals, f_, bold in spec:
+        rows.append(dict(cells=[lab] + [f_(v) for v in vals], size=8.5, h=0.225, line_bottom="E1E5EA", bolds={0: bold},
+                         align={j: "c" for j in range(1, len(hc) + 1)}))
+    table(s, x, y0 + 0.44, w, rows, [3.0] + [3.1 / len(hc)] * len(hc))
+    # 4 reading
+    panel_header(s, rx, y0, rw, F.get("box_title", "What the statements say"), None)
+    panel(s, rx, y0 + 0.44, rw, 2.0)
+    text(s, rx + 0.12, y0 + 0.50, rw - 0.24, 1.9, [(t.format(**nums), {"bullet": True, "space_after": 3}) for t in F["bullets"]], size=8.5)
+    notes(s, "TALKING POINT: return on capital is the test of competitive advantage (LBS: accounting and financial analysis). Here "
+             "the capital is inventory, so the cash cycle and the warehouse are the levers, and cash conversion lags EBITDA by design.")
+    return s
+
+
+# ------------------------------------------------------------------ capital allocation and financing
+def capital_allocation_slide(prs, d):
+    """Reinvest or pay out, self-funded growth vs. the plan, the financing menu and risk management – the financial
+    strategies for value creation."""
+    C = ct("cap_alloc")
+    J = _sotp_json()
+    shares, ke, wacc, tax = d.c("DCF", "shares"), d.c("WACC", "ke"), d.c("WACC", "wacc"), d.c("WACC", "tax")
+    cols5 = FC[:5]
+    yrs = d.years(cols5)
+    grev = d.row("Model", "grev", cols5)
+    roic = d.row("Model", "roic", cols5)
+    pay = d.row("Model", "payout", cols5)
+    lev = d.row("Model", "lev", cols5)
+    selff = [r * (1 - p_) for r, p_ in zip(roic, pay)]
+    nums = dict(ke=ke * 100, wacc=wacc * 100, g26=selff[0] * 100, rev26=grev[0] * 100, g28=selff[2] * 100, rev28=grev[2] * 100,
+                lev26=lev[0], levpeak=max(lev), levyear=yrs[lev.index(max(lev))], pay26=pay[0] * 100, pay27=pay[1] * 100)
+    deltas = {}
+    if J:
+        st = J["steps"]
+        for i, s_ in enumerate(st[1:]):
+            deltas[s_.get("seg")] = (s_["dcf"] - st[i]["dcf"], s_.get("stores") or 0)
+    s = std(prs, "Appendix #4.12", C.get("title", "Capital allocation and financing – what creates value"),
+            (C.get("subtitle") or "A new store returns 30%+ after tax against a {ke:.0f}% cost of equity – the roll-out, not the "
+                                  "dividend, is where the value is; the balance sheet can carry it").format(**nums), C["sources"])
+    # 1 reinvest or pay out
+    x, w = 0.47, 6.1
+    panel_header(s, x, 1.38, w, "Reinvest or pay out? Returns on a new store vs. the cost of capital", None)
+    rows = [_hdr(["", "Investment (NOKm)", "EBIT at maturity", "Pre-tax return", "After-tax return", "Value per NOK invested(1)"], h=0.36, size=7.5)]
+    for lab, inv, ebit, seg in C["stores"]:
+        dv, n = deltas.get(seg, (None, 0))
+        vpn = (dv * shares / (n * inv)) if (dv is not None and n) else None
+        rows.append(dict(cells=[lab, f"{inv:.1f}", f"{ebit:.1f}", f"{ebit / inv * 100:.0f}%", f"{ebit * (1 - tax) / inv * 100:.0f}%",
+                                (f"{vpn:.1f}x" if vpn else "–")], size=8.5, h=0.25, line_bottom="E1E5EA", bolds={0: True},
+                         align={j: "c" for j in range(1, 6)}))
+    rows.append(dict(cells=["Dividend (NOK 1 paid out)", "1.0", "–", "–", f"Ke {ke * 100:.1f}%", "1.0x"], size=8.5, h=0.25,
+                     line_bottom="E1E5EA", bolds={0: True}, align={j: "c" for j in range(1, 6)}, fill=PALEBLUE))
+    table(s, x, 1.82, w, rows, [1.6, 0.95, 0.85, 0.85, 0.95, 0.9])
+    text(s, x, 3.05, w, 1.1, [(t.format(**nums), {"bullet": True, "space_after": 3}) for t in C["reinvest_bullets"]], size=8.5)
+    # 2 self-funded growth vs plan
+    rx, rw = 6.77, 6.1
+    panel_header(s, rx, 1.38, rw, "Self-funded growth vs. the plan – why leverage rises", None)
+    gf = add_chart(s, XL_CHART_TYPE.COLUMN_CLUSTERED, rx, 1.80, rw, 1.85, yrs,
+                   [("Revenue growth (base case)", grev), ("Self-funded growth = ROIC x (1 – payout)", selff)], [NAVY, LBLUE],
+                   size=7.5, legend="t", labels=True, num_fmt="0%", label_pos=XL_LABEL_POSITION.OUTSIDE_END, gap=60, overlap=-10,
+                   val_min=0, val_max=max(grev) * 1.3)
+    text(s, rx, 3.68, rw, 0.5, C.get("growth_note", "").format(**nums), size=7.5, italic=True, color=MUTED)
+    # 3 financing menu
+    y0 = 4.30
+    panel_header(s, 0.47, y0, 8.0, "Financing menu for the warehouse and the roll-out", None)
+    rows = [_hdr(["Option", "Cash 2027-29E", "Leverage peak", "Value per share", "Our view"], h=0.26, size=8, aligns={1: "c", 2: "c", 3: "c", 4: "l"})]
+    for cells in C["menu"]:
+        rows.append(dict(cells=[c_.format(**nums) for c_ in cells], size=8, h=0.33, line_bottom="E1E5EA", bolds={0: True},
+                         align={1: "c", 2: "c", 3: "c", 4: "l"}))
+    table(s, 0.47, y0 + 0.44, 8.0, rows, [2.0, 1.1, 1.0, 1.1, 2.8], align=["l", "c", "c", "c", "l"])
+    # 4 risk management and strategic options
+    bx, bw = 8.62, 4.25
+    panel_header(s, bx, y0, bw, C.get("box_title", "Risk management and strategic options"), None)
+    panel(s, bx, y0 + 0.44, bw, 2.1)
+    text(s, bx + 0.12, y0 + 0.50, bw - 0.24, 2.0, [(t.format(**nums), {"bullet": True, "space_after": 3}) for t in C["bullets"]], size=8)
+    notes(s, "TALKING POINT: the company's own capital returns are the benchmark for every other use of cash (LBS: financial "
+             "strategies for value creation). Dividends are value-neutral; a store is not. The financing menu shows that the "
+             "leverage target and the roll-out can both be met – with a lower payout or a sale-and-leaseback.")
     return s
