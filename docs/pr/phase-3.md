@@ -18,6 +18,6 @@ Two repositories, one branch each (`phase-3-measurable`).
 - `blindtest/`: form builder with opaque ids and a separate key, scorer, fairness warnings; SATS spec with our case
   and a public-data consensus summary; the broker-argument document is left for the organiser (paywalled sources).
 - The reverse-DCF gate in CI shipped with phase 2 (`case_gate.py`).
-- Tests: 19 passed.
+- Tests: 16 passed (13 + 3 blind-test).
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
