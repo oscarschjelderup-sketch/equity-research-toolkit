@@ -280,6 +280,32 @@ PEERS = [  # name, country, mcap, ev, evs(3), evebitda(3), evebit(3), pe(3), ebi
     ("Rusta", "SE", 11288, 10725, (0.87, 0.77, None), (10.9, 9.6, None), (13.7, 11.8, None), (17.3, 14.9, None), 0.063, 0.092, 0.902, 0.00, 0.206),
 ]
 
+
+# ---- audit inputs (model_builder/audit.py; docs/research/03 failure modes). Reasons are the case's documented rationale
+# (quoted from the comments above, 8 Oct 2026); review them before publishing. Conflicts: to be filled by the author.
+META = dict(
+    sector="consumer", cyclical=False, commodity=None, binary_event=None, reporting_currency="NOK",
+    last_share_issue=None,            # no share issue since the balance sheet date; buybacks only
+    guidance=dict(ebit_margin=None),  # CMD 2025 ambitions are in EBITDA before IFRS 16 and openings, see TARGETS text
+    conflicts=None,                   # author's holdings and other conflicts – to be filled by the author (VPFF Standard 3)
+    disclosures=dict(
+        author="Case author (private student case study)",
+        price_datetime="6 Oct 2026, close (Oslo Børs)",
+        rating_definitions="BUY: 12-month expected total return above the cost of equity + 5pp; SELL: below Ke − 5pp; HOLD in between",
+        valuation_summary="70% DCF (FCFF after lease payments, value-driver terminal value) + 30% peer multiples, rolled forward 12 months",
+        update_frequency="After each quarterly report",
+        history_12m="Judgement log (oq book) – first call 6 Oct 2026",
+        status="Private student case study; not investment research or advice",
+    ),
+    reasons=dict(
+        A2="Bear is 45% below base; the revenue spread is narrow because the bear is a cost/price story at the committed club pipeline, not a volume collapse (SCENARIO_ADJ comment).",
+        A3="Margin above history because fixed club costs are spread over price increases and a maturing Swedish estate; personnel ratio sensitivity shown on the assumptions slide (case text).",
+        A4="Peer median is mixed retail and fitness on different lease bases; the case's own reverse DCF shows the market prices 12.3% against our 15.1% (case text).",
+        A5="RONIC 25%: a new club costs NOK 7-8m and pays back in about three years (CMD 2025); terminal RONIC = WACC gives NOK 45 per share and is shown as a what-if (TERMINAL comment).",
+        B21="1.0% size/liquidity premium for a NOK ~7.6bn market cap with ~NOK 20m daily turnover: above the PwC/FFN median (0%) and about its average for market caps above NOK 5bn (WACC_INPUTS comment).",
+    ),
+)
+
 if __name__ == "__main__":
     d = simulate()
     for i, y in enumerate(YEARS):

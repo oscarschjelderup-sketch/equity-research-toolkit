@@ -159,3 +159,10 @@ print(f"  growth shift {dg * 100:+.3f}pp -> python value {dcf(forecast(mode, dg=
       f"(implied revenue CAGR {cell('Reverse_DCF', 'rd_cagr'):.2%} vs. ours {cell('Reverse_DCF', 'rd_cagr_ours'):.2%}; interpolated)")
 print(f"  WACC {iw:.4%}          -> python value {dcf(o, wacc=iw)['ps']:.4f}")
 print(f"  terminal growth {ig:.4%} -> python value {dcf(o, g=ig)['ps']:.4f}")
+
+# ---- case audit: the documented failure modes and Norwegian rules (audit.py; ANALYSE.md)
+if os.environ.get("EQR_CASE"):
+    import audit as _audit
+    _case = _audit.Case(os.environ.get("EQR_MODEL", "model_final.xlsx"), os.environ.get("EQR_MAP", "model_map.json"), os.environ["EQR_CASE"])
+    print()
+    print(_audit.render(_audit.audit(_case), f"– {_case.c('Inputs|company')}"))
