@@ -1,0 +1,50 @@
+# Decisions
+
+One entry per decision: date, what, why, alternatives considered. Newest last. The mission (Oscar, 22 Oct 2026):
+make the toolkit and oslo-quant the best analysis setup one person can have for Oslo Børs, with every judgement
+logged so it can be measured. Rules: no invented numbers (estimates marked EST), sources for every "best
+practice" claim, structure not wording from other analysts, no push without an explicit yes, private cases and
+the research book stay out of public repositories.
+
+## 2026-10-22 – Working method
+
+- **One branch per phase** (`phase-1-research`, `phase-2-rules`, `phase-3-measurable`, `phase-4-routine`). The
+  mission asks for one pull request per phase *and* no push without an explicit yes. The two are reconciled by
+  committing each phase on its own branch with the PR description in `docs/pr/phase-N.md`; the PR is opened only
+  after Oscar says yes to the push.
+- **Phase 1 runs as four parallel research agents** (rankings; report structure; documented errors; the craft),
+  each writing one file in `docs/research/` with a source for every claim and a section "Det som ikke lot seg finne
+  offentlig". Paywalled sources (Bloomberg, FactSet, Infront, broker portals, Kapital's full ranking tables) are
+  named as such, not reconstructed.
+- **Copyright:** the research notes describe the structure of analyst reports (sections, order, lengths, what is
+  quantified) and paraphrase arguments; no report text is reproduced beyond short attributed quotes.
+- **No self-assessment of quality.** Whether a case is good is decided by the calibration report (phase 3) and
+  blind judges Oscar recruits, not by the tool's author.
+
+## 2026-10-22 – Phase 3 built ahead of phases 1-2 where it does not depend on the research
+
+- **Judgement log lives in oslo-quant, data stays private.** Code: `osloquant/judgements.py` (public repo); data:
+  `~/osloquant-home/judgements.jsonl` (private, like the research book). Append-only JSON lines, each row with the
+  SHA-256 of its content and of the previous row. Alternative rejected: a git branch per log (public by default)
+  and a database (edits are silent). The chain makes edits visible, not impossible; the head hash is printed on
+  every write and recorded by the monthly routine (phase 4) so a rewritten file can be spotted against it.
+- **What a judgement is:** date, call price, rating (BUY/HOLD/SELL), 12-month target, bear/base/bull values,
+  scenario probabilities (must sum to 1; the target must lie between bear and bull), kill criteria, thesis. A
+  changed view is a new row. Kill checks are their own rows (criterion, breached, action).
+- **Calibration metrics:** total return from the *call price* (not that day's close) times the dividend factor of
+  the adjusted series; excess over OSEBX; direction = sign of excess for BUY/SELL, within ±10 % for HOLD; price
+  vs target; inside the bear-bull band; three-way Brier score of the scenario nearest the outcome, only after the
+  horizon. Calls younger than 12 months are "provisional" and reported separately – they are not evidence.
+- **First two rows logged 22 Oct 2026**, one per research-book case; the rows, their figures and the head hash
+  stay in `~/osloquant-home/judgements.jsonl` (private).
+- **Case gate thresholds** (`model_builder/case_gate.py`, tested in CI on the example and SATS workbooks): the
+  reverse DCF must be solved, at least one market-implied driver (final-year EBIT margin or revenue CAGR) must
+  differ from ours by ≥ 1.0pp, and |DCF/price − 1| ≥ 10 %. 1pp is the smallest gap that moves value by more than
+  the sensitivity table's half-step (≈ NOK 4/share per pp of margin in both cases); 10 % matches the toolkit's
+  BUY/SELL thresholds. Both are provisional until the phase 1-2 research says what top analysts use.
+- **Blind test design:** documents under opaque ids, order shuffled per judge (seeded by initials), the key in a
+  separate file never sent to judges (`*.key.json` git-ignored), fairness warnings for word counts outside ±25 %,
+  differing sections or broker names. Fewer than five judges is reported as anecdote. Specs for private cases
+  are git-ignored.
+- **Public signal page:** `site/signals.html` in oslo-quant states that no buy signal pays after a 0.5 % round trip,
+  with the scorecard, and the caveats (survivorship, overlapping windows inflate t-statistics).
