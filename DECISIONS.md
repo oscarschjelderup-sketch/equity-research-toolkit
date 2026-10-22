@@ -87,5 +87,5 @@ the research book stay out of public repositories.
 - **Recorded heads:** `oq book monthly` appends the log's head hash to `judgements-heads.txt`; a later check fails if
   any recorded head no longer matches its row – this catches a log rewritten as a fresh, internally valid chain.
 - **Calibration on a common date:** returns come from the adjusted series; the quoted series is used only when it
-  has the same date (it is recorded on request and lagged by three sessions on 22 Oct, which moved SATS from +5.8 %
-  to +8.2 % in the first run).
+  has the same date (it is recorded on request and lagged by three sessions on 22 Oct, which put SATS at +8.2 % instead
+  of +5.8 % in the first run).
