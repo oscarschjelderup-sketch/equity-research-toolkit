@@ -74,3 +74,18 @@ the research book stay out of public repositories.
 - **The reverse-DCF case gate moves into phase 2** (it is rule 1.3 of ANALYSE.md and its test sits in the same test
   file as the audit test).
 - **Banks:** the FCFF template does not apply (04 R35); a bank template is listed as future work, not built.
+
+## 2026-10-22 – Phase 4: the monthly routine
+
+- **A scheduled Claude task, not a Windows task:** step 4 (new rankings, reports, errors) needs web research and
+  judgement, which a script cannot do. The numeric steps are commands (`oq book monthly`, `audit.py`, `case_gate.py`)
+  so the task only orchestrates and writes. It runs on the 2nd of the month at 09:00 local time (the 1st can be a
+  holiday; the previous month's data is complete by then) and only while the desktop app is open – a missed month
+  shows as a missing `monthly/YYYY-MM.md`.
+- **Proposals, not changes:** the task may edit `ANALYSE.md` only on a local branch `monthly-YYYY-MM`; it never
+  pushes, never opens a PR and never writes to the judgement log or the research book.
+- **Recorded heads:** `oq book monthly` appends the log's head hash to `judgements-heads.txt`; a later check fails if
+  any recorded head no longer matches its row – this catches a log rewritten as a fresh, internally valid chain.
+- **Calibration on a common date:** returns come from the adjusted series; the quoted series is used only when it
+  has the same date (it is recorded on request and lagged by three sessions on 22 Oct, which put SATS at +8.2 % instead
+  of +5.8 % in the first run).
