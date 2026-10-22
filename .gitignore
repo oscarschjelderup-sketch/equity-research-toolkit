@@ -35,3 +35,8 @@ deck_builder/outlet_deck.py
 /OUTLET/
 model_builder/sotp_outlet.json
 model_builder/fin.log
+
+# blind-test outputs: the key must never be published with the form; private specs stay local
+blindtest/out/
+blindtest/specs/private-*.yaml
+*.key.json
