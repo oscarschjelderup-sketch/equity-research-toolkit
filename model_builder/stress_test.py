@@ -89,5 +89,44 @@ try:
                 rng.Value = v
         snap(tag)
     wb.Close(False)
+
+    # ---- research-driven stresses (docs/research/03 failure modes; ANALYSE.md): each from a fresh copy of the model
+    import importlib
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    meta = getattr(importlib.import_module(os.environ.get("EQR_CASE", "example_data")), "META", {}) or {}
+    print()
+    print("Research-driven stresses (ANALYSE.md):")
+    wb = xl.Workbooks.Open(os.path.abspath(os.environ.get("EQR_MODEL", "model_final.xlsx")), 0, True)
+    inp, dcf, chk, sens = (wb.Worksheets(n) for n in ("Inputs", "DCF", "Checks", "Sensitivity"))
+    drv, model, hist = wb.Worksheets("Drivers"), wb.Worksheets("Model"), wb.Worksheets("Hist")
+    rr = lambda key: reg["rows"][key]  # noqa: E731
+    hist_m = [model.Range(f"{c}{rr('Model|ebit_adj_m')}").Value for c in "EFGHIJK"]
+    hist_m = [v for v in hist_m if isinstance(v, (int, float))]
+    last_m = model.Range(f"S{rr('Model|ebit_adj_m')}").Value
+    nwc_last = hist.Range(f"K{rr('Hist|nwc_pct')}").Value
+    stresses = [
+        ("#4 margins revert to the last-3-year mean*", [("Sensitivity", "ovr_margin", round(-(last_m - sum(hist_m[-3:]) / 3), 4))]),
+        ("#17 NWC/sales held at the last actual", [("Drivers", "row:b_nwc", round(nwc_last, 4))]),
+        ("#21 WACC +1pp", [("WACC", "wacc_ovr", round(wb.Worksheets("WACC").Range(C("WACC", "wacc")).Value + 0.01, 4))]),
+        ("#5 RONIC = WACC in the terminal value", [("Drivers", "ronic_in", round(wb.Worksheets("WACC").Range(C("WACC", "wacc")).Value, 4))]),
+    ]
+    if meta.get("sector") in ("salmon", "eandp"):
+        tax0 = drv.Range(f"L{rr('Drivers|b_tax')}").Value
+        stresses.append(("#16 effective tax +15pp", [("Drivers", "row:b_tax", round(tax0 + 0.15, 4))]))
+    for tag, changes in stresses:
+        undo = []
+        for sheet, key, v in changes:
+            if key.startswith("row:"):
+                rng = wb.Worksheets(sheet).Range(f"L{reg['rows'][f'{sheet}|{key[4:]}']}:S{reg['rows'][f'{sheet}|{key[4:]}']}")
+            else:
+                rng = wb.Worksheets(sheet).Range(C(sheet, key))
+            undo.append((rng, rng.Formula))
+            rng.Value = v
+        snap(tag)
+        for rng, f in undo:
+            rng.Formula = f
+    print("* the margin override is a data-table input, so the workbook check on blank data-table inputs reports an ERROR by design")
+    wb.Close(False)
 finally:
     xl.Quit()

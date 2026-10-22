@@ -91,3 +91,34 @@ def test_chart_library(tmp_path):
     out = tmp_path / "library.pptx"
     run(["build_chartlib.py", out], DB, EQR_TEMPLATE="none", EQR_CASE="example_data")
     assert slides(out) == 23
+
+
+@pytest.mark.parametrize("xlsx, committed_map", [(EXAMPLE_XLSX, "model_map.json"), (SATS_XLSX, "model_map_sats.json")])
+def test_case_gate_shows_where_the_view_differs_from_the_market(xlsx, committed_map):
+    """A case must state what the market prices in and differ from it in numbers (DECISIONS.md, 2026-10-22)."""
+    sys.path.insert(0, str(MB))
+    try:
+        import case_gate
+    finally:
+        sys.path.remove(str(MB))
+    d = case_gate.read(xlsx, MB / committed_map)
+    ok, problems = case_gate.gate(d)
+    assert ok, problems
+    # the gate fails a view that only repeats the market
+    same = {**d, "m_ours": d["m_implied"], "g_ours": d["g_implied"], "dcf": d["price"] * 1.02}
+    ok, problems = case_gate.gate(same)
+    assert not ok and len(problems) == 2
+
+
+def test_audit_runs_on_the_committed_sats_case():
+    """The 30 failure-mode checks (ANALYSE.md §4): no hard failure, every judgement flag answered."""
+    sys.path.insert(0, str(MB))
+    try:
+        import audit
+    finally:
+        sys.path.remove(str(MB))
+    case = audit.Case(SATS_XLSX, MB / "model_map_sats.json", "sats_data")
+    res = audit.audit(case)
+    assert len({r.id for r in res}) == 30
+    bad = [r for r in res if r.status in (audit.FAIL, audit.FLAG)]
+    assert not bad, [(r.id, r.detail) for r in bad]
