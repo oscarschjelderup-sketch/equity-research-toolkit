@@ -14,7 +14,7 @@
 - `sats_data.py` gets its META block.
 
 **Evidence**
-- `pytest`: 16 passed (incl. the audit on the committed SATS workbook: no FAIL, no unanswered FLAG).
+- `pytest`: 13 passed (incl. the audit on the committed SATS workbook: no FAIL, no unanswered FLAG).
 - SATS and the private case: no hard failures; five judgement flags each, answered from the cases' text; both turn SELL at
   the last-3-year mean margin (SATS NOK 30.5).
 
