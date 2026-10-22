@@ -1,0 +1,76 @@
+# Blind test spec: SATS ASA. Three write-ups with the same five sections, judged without knowing the author.
+# Build:  python blindtest/build_blindtest.py blindtest/specs/sats.yaml --out blindtest/out --strict
+# --strict refuses to build while a document still contains TODO or the fairness warnings fire.
+#
+# Sources for the consensus document (public, accessed 22 Oct 2026): Yahoo Finance SATS.OL analyst estimates
+# (7 Oct 2026: mean TP NOK 51.4, EPS 2026E 2.90 / 2027E 3.51); listr.no/sats-no (11 Feb 2026: three banks, average
+# TP NOK 48, Pareto and SB1 Markets BUY, DNB Carnegie BUY 8 Dec 2025); Finansavisen 23 Apr 2025 (Danske Bank
+# initiation, BUY, TP NOK 45 – headline only, the article is paywalled).
+# The third document must summarise the strongest published broker arguments; those reports are behind broker
+# portals and Finansavisen/DN paywalls (docs/research/02 section 5), so it is left for the organiser to write from
+# material he has lawful access to – structure only, in his own words, no broker names.
+id: sats
+title: "SATS ASA – which write-up is the most thorough?"
+intro: >-
+  You will see three short write-ups on the same company, written by different people. Score each on the criteria
+  (1-5), then rank them on thoroughness. Judge the analysis, not the conclusion: they need not agree on the rating.
+documents:
+  - author: ours (Equity Research Toolkit case, 6 Oct 2026)
+    sections:
+      - title: Thesis
+        text: >-
+          BUY, 12-month target NOK 54 (price NOK 39.75). Nordic market leader in gyms with 755k members at the end of 2025. Price
+          increases and a maturing Swedish estate lift the EBIT margin (pre-IFRS 16) from 11.7% in 2025 to 15.1% by
+          2033; openings follow the committed pipeline (13 clubs through 2028), below the 8-12 a year management target.
+      - title: What the price implies
+        text: >-
+          A reverse DCF at NOK 39.75 implies a final-year EBIT margin of 12.3% and revenue growth of 4.5% a year, against
+          our 15.1% and 5.1%; or a WACC of 10.7% against our 9.1%. Each percentage point of margin is worth about NOK 4
+          per share. The disagreement is the margin, not growth.
+      - title: Valuation
+        text: >-
+          70% DCF (FCFF after lease payments, WACC 9.1%, terminal growth 2%, RONIC 25%) gives NOK 50.7; 30% peer
+          multiples (fitness and leisure peers, pre-IFRS 16 basis) give about NOK 50; rolled forward twelve months.
+          Bear NOK 28 and bull NOK 74 with probabilities 25/50/25.
+      - title: Risks and what would prove it wrong
+        text: >-
+          Wage inflation: personnel costs above 37% of revenue undo the margin case. Price increases that cost
+          members. Openings below the committed pipeline. If margins fall back to the last three years' average the
+          value is NOK 30.5 – a sell. Leverage is low (1.1x), so the risk is earnings, not funding.
+      - title: Catalysts
+        text: >-
+          Q3 report 27 Oct 2026 (price/mix, member numbers, Swedish margin); Q4 report Feb 2027 with the size of the
+          next buyback programme; AGM May 2027 renewing the buyback mandate.
+  - author: consensus summary (public data only)
+    sections:
+      - title: Thesis
+        text: >-
+          The covering banks rate the stock BUY. The published average target was NOK 48 in February 2026 and NOK 51.4
+          in October 2026, against a price around NOK 40-43. The public summaries do not state the thesis behind the
+          targets beyond continued earnings growth.
+      - title: What the price implies
+        text: >-
+          Not stated in the public consensus data. The average target implies roughly 20-30% upside over twelve
+          months; consensus expects earnings per share of NOK 2.90 for 2026 and NOK 3.51 for 2027.
+      - title: Valuation
+        text: >-
+          The method behind the published targets is not public. Consensus earnings of NOK 3.51 per share for 2027 put
+          the stock on about 11-12 times 2027 earnings at the current price.
+      - title: Risks and what would prove it wrong
+        text: >-
+          Not stated in the public consensus data.
+      - title: Catalysts
+        text: >-
+          Quarterly reports; the next is 27 October 2026. No other dated events are given in the public consensus data.
+  - author: best published broker arguments (organiser to write)
+    sections:
+      - title: Thesis
+        text: "TODO: the strongest published broker thesis in your own words (no broker names), ~60 words."
+      - title: What the price implies
+        text: "TODO: if the broker states it; otherwise write 'not stated'."
+      - title: Valuation
+        text: "TODO: method, key inputs and the value as the broker states them."
+      - title: Risks and what would prove it wrong
+        text: "TODO: the risks the broker names, with numbers where given."
+      - title: Catalysts
+        text: "TODO: the dated events the broker names."
