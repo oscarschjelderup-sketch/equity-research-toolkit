@@ -1,6 +1,10 @@
 # Build the workbook layout and the decks (any OS)
 openpyxl>=3.1
 python-pptx>=1.0
+# Research report (deck_builder/build_report.py): charts and the PDF page count; the PDF itself needs a Chromium browser
+matplotlib>=3.8
+pypdf>=4
+# optional: yfinance for build_report.py --refresh-prices
 # Blind test specs (blindtest/)
 pyyaml>=6
 lxml>=4.9
