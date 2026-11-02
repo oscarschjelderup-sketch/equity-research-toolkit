@@ -81,13 +81,14 @@ def table(headers, rows, cls="num", widths=None, first_left=True, bold_rows=(), 
     """A table. `headers` are already-escaped strings (use est_header); cells are strings. The first column and the
     columns listed in `left` are text (left-aligned, wrapping); the rest are numbers (right-aligned)."""
     txt = set(left) | ({0} if first_left else set())
-    th = "".join(f"<th{' class=\"txt\"' if i in txt else ''}>{h}</th>" for i, h in enumerate(headers))
+    TXT = ' class="txt"'
+    th = "".join(f"<th{TXT if i in txt else ''}>{h}</th>" for i, h in enumerate(headers))
     cg = ""
     if widths:
         cg = "<colgroup>" + "".join(f"<col style='width:{w}'>" for w in widths) + "</colgroup>"
     body = []
     for ri, r in enumerate(rows):
-        tds = "".join(f"<td{' class=\"txt\"' if i in txt else ''}>{c}</td>" for i, c in enumerate(r))
+        tds = "".join(f"<td{TXT if i in txt else ''}>{c}</td>" for i, c in enumerate(r))
         classes = []
         if ri in bold_rows:
             classes.append("b")
