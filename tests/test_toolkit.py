@@ -55,7 +55,7 @@ def test_deck_builder_uses_the_same_map():
 
 @pytest.mark.parametrize("xlsx, committed_map, dcf, tp", [
     (EXAMPLE_XLSX, "model_map.json", 139.11, 146),
-    (SATS_XLSX, "model_map_sats.json", 50.71, 54),
+    (SATS_XLSX, "model_map_sats.json", 54.42, 58),
 ])
 def test_committed_workbooks_pass_their_checks(xlsx, committed_map, dcf, tp):
     cells = json.loads((MB / committed_map).read_text(encoding="utf8"))["cells"]

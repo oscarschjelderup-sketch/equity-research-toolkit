@@ -171,15 +171,15 @@ CSS = """
 @page :first { @top-left { content: none; } @top-right { content: none; } }
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
-body { font: 8.6pt/1.32 Arial, Helvetica, sans-serif; color: #111; background: #fff; }
+body { font: 10pt/1.38 Arial, Helvetica, sans-serif; color: #111; background: #fff; }
 .runhead { string-set: runhead content(text); } .rundate { string-set: rundate content(text); }
 .hidden { position: absolute; left: -9999px; top: 0; font-size: 1pt; }
-h1 { font: 700 15pt/1.15 Arial, Helvetica, sans-serif; color: #003255; margin: 0 0 6px 0; padding-bottom: 4px; border-bottom: 1.5px solid #003255; }
+h1 { font: 700 16pt/1.15 Arial, Helvetica, sans-serif; color: #003255; margin: 0 0 6px 0; padding-bottom: 4px; border-bottom: 1.5px solid #003255; }
 h1 .n { display: inline-block; min-width: 22px; color: #81B0C0; margin-right: 6px; }
-h2 { font: 700 10.5pt/1.2 Arial, Helvetica, sans-serif; color: #003255; margin: 10px 0 4px 0; }
+h2 { font: 700 11pt/1.2 Arial, Helvetica, sans-serif; color: #003255; margin: 10px 0 4px 0; }
 h3 { font: 700 9pt/1.2 Arial, Helvetica, sans-serif; color: #4F7FA0; margin: 8px 0 3px 0; }
 p { margin: 0 0 5px 0; text-align: left; }
-p.lead { font-size: 9.3pt; color: #003255; margin-bottom: 8px; }
+p.lead { font-size: 10.6pt; color: #003255; margin-bottom: 8px; }
 ul { margin: 0 0 5px 0; padding-left: 13px; } li { margin: 0 0 2px 0; }
 ul.tight li { margin: 0; }
 .sec { break-before: page; }
@@ -188,28 +188,28 @@ ul.tight li { margin: 0; }
 .pb { break-after: page; }
 .cols { display: flex; gap: 12px; align-items: flex-start; } .col { min-width: 0; }
 .box { border: 1px solid #D6E6EC; padding: 6px 8px; margin: 4px 0 8px 0; background: #fff; break-inside: avoid; }
-.box .bt { font-weight: 700; color: #003255; margin-bottom: 3px; font-size: 8.4pt; }
+.box .bt { font-weight: 700; color: #003255; margin-bottom: 3px; font-size: 9pt; }
 .box.grey { background: #F2F6F8; }
 .box.navy { background: #003255; color: #fff; } .box.navy .bt { color: #81B0C0; }
 figure.ex { margin: 6px 0 10px 0; break-inside: avoid; }
-figure.ex figcaption { font-weight: 700; color: #003255; font-size: 8.4pt; margin: 0 0 3px 0; padding-bottom: 2px; border-bottom: 1px solid #81B0C0; }
-figure.ex .src { font-size: 6.6pt; color: #6B6B6B; margin-top: 2px; }
-figure.ex .note { font-size: 6.8pt; color: #444; margin-top: 2px; }
+figure.ex figcaption { font-weight: 700; color: #003255; font-size: 9.6pt; margin: 0 0 3px 0; padding-bottom: 2px; border-bottom: 1px solid #81B0C0; }
+figure.ex .src { font-size: 7.4pt; color: #6B6B6B; margin-top: 2px; }
+figure.ex .note { font-size: 7.4pt; color: #444; margin-top: 2px; }
 figure.ex svg { width: 100%; height: auto; display: block; }
-table { border-collapse: collapse; width: 100%; font-size: 7.4pt; }
-table.num th, table.num td { padding: 1.6px 4px; text-align: right; white-space: nowrap; }
+table { border-collapse: collapse; width: 100%; font-size: 8.5pt; }
+table.num th, table.num td { padding: 2.6px 4px; text-align: right; white-space: nowrap; }
 table.num th { background: #003255; color: #fff; font-weight: 700; border-bottom: 1px solid #003255; }
 table.num td { border-bottom: 0.5px solid #E3EAEE; }
 table.num th.txt, table.num td.txt { text-align: left; white-space: normal; }
 table.num tr.b td { font-weight: 700; }
 table.num tr.rule td { border-top: 1px solid #003255; }
 table.num tbody tr:nth-child(even) td { background: #FAFCFD; }
-table.kv { font-size: 7.6pt; } table.kv td { padding: 1.5px 3px; border-bottom: 0.5px solid #E3EAEE; text-align: right; white-space: nowrap; }
+table.kv { font-size: 8.5pt; } table.kv td { padding: 2.4px 3px; border-bottom: 0.5px solid #E3EAEE; text-align: right; white-space: nowrap; }
 table.kv td.txt { text-align: left; color: #333; white-space: normal; }
 table.wrap td, table.wrap th { white-space: normal !important; vertical-align: top; }
 .est { display: inline-block; font-size: 5.6pt; font-weight: 700; color: #003255; background: #D6E6EC; border-radius: 2px; padding: 0 2px; margin-left: 3px; vertical-align: 1px; }
 th .est { color: #003255; background: #D6E6EC; }
-.gap { border: 1px dashed #C9A227; background: #FFFBEA; color: #5a4a00; padding: 4px 7px; font-size: 7.6pt; margin: 4px 0 8px 0; break-inside: avoid; }
+.gap { border: 1px dashed #C9A227; background: #FFFBEA; color: #5a4a00; padding: 4px 7px; font-size: 8pt; margin: 4px 0 8px 0; break-inside: avoid; }
 .na { color: #6B6B6B; font-style: italic; }
 .pos { color: #2E7D32; } .neg { color: #C00000; }
 .tag { display: inline-block; font-size: 6.6pt; font-weight: 700; padding: 1px 5px; border-radius: 2px; color: #fff; background: #4F7FA0; }
@@ -223,7 +223,7 @@ th .est { color: #003255; background: #D6E6EC; }
 .front .brand .t2 { font: 7pt Arial; color: #6B6B6B; }
 .front .co { font: 700 22pt/1.05 Arial; color: #003255; margin: 2px 0 0 0; }
 .front .title { font: 400 15pt/1.15 Arial; color: #003255; margin: 2px 0 8px 0; }
-.front .abstract { font-size: 10pt; line-height: 1.3; color: #222; margin-bottom: 9px; }
+.front .abstract { font-size: 10.6pt; line-height: 1.3; color: #222; margin-bottom: 9px; }
 .front .memo p { margin-bottom: 6px; }
 .front .memo b.h { color: #003255; }
 .front .rec { border: 1.5px solid #003255; padding: 6px 9px; margin-bottom: 8px; }
@@ -231,15 +231,15 @@ th .est { color: #003255; background: #D6E6EC; }
 .front .rec .r2 { font: 700 12pt/1.3 Arial; color: #003255; }
 .front .rec .r3 { font-size: 7.6pt; color: #333; }
 .front .rail h4 { font: 700 7.6pt Arial; color: #003255; margin: 7px 0 2px 0; border-bottom: 1px solid #81B0C0; text-transform: uppercase; letter-spacing: 0.3px; }
-.front .rail table.kv { font-size: 7.1pt; }
+.front .rail table.kv { font-size: 7.6pt; }
 .front .fin { margin-top: 8px; }
-.front .fin table { font-size: 6.9pt; }
+.front .fin table { font-size: 7.8pt; }
 .front .disc { font-size: 6.6pt; color: #444; border-top: 1px solid #81B0C0; margin-top: 8px; padding-top: 3px; }
 .front .analysts { font-size: 7pt; margin-top: 6px; color: #333; }
 /* misc */
-.small { font-size: 7.2pt; } .muted { color: #6B6B6B; }
+.small { font-size: 8pt; } .muted { color: #6B6B6B; }
 .toc td { padding: 1.5px 4px; border-bottom: 0.5px dotted #B8CBD4; font-size: 8pt; }
 .kill td { vertical-align: top; }
 .center { text-align: center; }
-.legend { font-size: 6.8pt; color: #444; }
+.legend { font-size: 7.4pt; color: #444; }
 """

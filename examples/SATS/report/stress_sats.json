@@ -1,0 +1,255 @@
+[
+ {
+  "tag": "Base (as delivered)",
+  "kind": "base",
+  "dcf": 54.42400816712141,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "Scenario = Bear",
+  "kind": "switch",
+  "dcf": 31.149243713999866,
+  "tp": 38.0,
+  "rating": "SELL",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   20
+  ]
+ },
+ {
+  "tag": "Scenario = Bull",
+  "kind": "switch",
+  "dcf": 77.85145618438163,
+  "tp": 78.0,
+  "rating": "BUY",
+  "status": "OK – 2 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21,
+   27
+  ]
+ },
+ {
+  "tag": "Revenue mode 1 (segments)",
+  "kind": "switch",
+  "dcf": 38.460903587338294,
+  "tp": 45.0,
+  "rating": "HOLD",
+  "status": "ALL CHECKS OK",
+  "errors": [],
+  "warnings": []
+ },
+ {
+  "tag": "Mid-year off",
+  "kind": "switch",
+  "dcf": 51.897379200068364,
+  "tp": 56.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "Terminal FCFF method 2",
+  "kind": "switch",
+  "dcf": 54.57698538845165,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "50/50 Gordon / exit multiple",
+  "kind": "switch",
+  "dcf": 55.22561473412696,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 2 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21,
+   27
+  ]
+ },
+ {
+  "tag": "Peer basis ex leases, FY1",
+  "kind": "switch",
+  "dcf": 54.42400816712141,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "No 12m roll-forward, 100% DCF",
+  "kind": "switch",
+  "dcf": 54.42400816712141,
+  "tp": 54.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "WACC override 10%",
+  "kind": "switch",
+  "dcf": 47.230943926702395,
+  "tp": 52.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "Valuation date 01.03.2026",
+  "kind": "switch",
+  "dcf": 52.92448293856832,
+  "tp": 57.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "Share price +25%",
+  "kind": "switch",
+  "dcf": 54.42400816712141,
+  "tp": 58.0,
+  "rating": "HOLD",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "WACC on modelled capital structure",
+  "kind": "switch",
+  "dcf": 54.59313019020877,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "Buybacks off (cash builds up)",
+  "kind": "switch",
+  "dcf": 54.42400816712141,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 2 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21,
+   23
+  ]
+ },
+ {
+  "tag": "Sales-to-capital 1.0x (capital-heavy growth)",
+  "kind": "switch",
+  "dcf": 54.42400816712141,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "Capex per new location +50%",
+  "kind": "switch",
+  "dcf": 53.76540032740837,
+  "tp": 57.0,
+  "rating": "BUY",
+  "status": "ALL CHECKS OK",
+  "errors": [],
+  "warnings": []
+ },
+ {
+  "tag": "Fixed cost shares 0% (all costs variable)",
+  "kind": "switch",
+  "dcf": 42.154087213520675,
+  "tp": 46.0,
+  "rating": "HOLD",
+  "status": "ALL CHECKS OK",
+  "errors": [],
+  "warnings": []
+ },
+ {
+  "tag": "#4 margins revert to the last-3-year mean*",
+  "kind": "research",
+  "dcf": 30.85841696634643,
+  "tp": 33.0,
+  "rating": "SELL",
+  "status": "1 ERROR(S)",
+  "errors": [
+   "Data-table input cells are blank"
+  ],
+  "warnings": [
+   29
+  ]
+ },
+ {
+  "tag": "#17 NWC/sales held at the last actual",
+  "kind": "research",
+  "dcf": 54.481115087122696,
+  "tp": 58.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "#21 WACC +1pp",
+  "kind": "research",
+  "dcf": 46.82891342783288,
+  "tp": 52.0,
+  "rating": "BUY",
+  "status": "OK – 1 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   21
+  ]
+ },
+ {
+  "tag": "#5 RONIC = WACC in the terminal value",
+  "kind": "research",
+  "dcf": 48.37704197608113,
+  "tp": 53.0,
+  "rating": "BUY",
+  "status": "OK – 3 WARNING(S)",
+  "errors": [],
+  "warnings": [
+   11,
+   21,
+   27
+  ]
+ }
+]
