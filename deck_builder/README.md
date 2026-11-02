@@ -6,6 +6,7 @@ Builds PowerPoint files from a saved workbook, so every number on a slide is the
 |---|---|---|
 | `build_deck.py` | The pitch deck: cover, team, the four content slides and a nine-slide appendix | `../Equity_Research_Pitch_Generated.pptx` |
 | `build_chartlib.py` | The chart and framework library (23 slides) | `../Equity_Research_Chart_Library_Generated.pptx` |
+| `build_report.py` | The full research report (25–40 pages, HTML printed to PDF by headless Chrome/Edge) – see *Research report* below | `../examples/<TICKER>/report/` |
 
 ## Use
 
@@ -53,3 +54,32 @@ Optional case keys read by the generic slides: `ipo_price` (football-field marke
 EQR_CASE=sats_data python build_deck.py --model ../examples/SATS/SATS_ASA_DCF_Model.xlsx \
     --map ../model_builder/model_map_sats.json --out ../my_sats_deck.pptx
 ```
+
+## Research report
+
+`build_report.py` builds a broker-style research report from the same workbook and case modules as the deck. Its
+structure follows `docs/rapport/struktur.md` (learned from a full-length DNB Markets note): front page, investment case,
+company overview, quarter preview, deep dives, competition per market, macro, estimate revisions, valuation, financial
+statements, what we do not know, disclosures with the build checks.
+
+```bash
+EQR_CASE=sats_data python build_report.py --model ../examples/SATS/SATS_ASA_DCF_Model.xlsx     --map ../model_builder/model_map_sats.json --out-dir ../examples/SATS/report --refresh-prices
+```
+
+- **The build gate runs first** (`report/rb_gate.py`): the Checks sheet, `verify_dcf.py`, the case audit and case gate,
+  and `stress_test.py`. A failing check stops the build (exit code 2). `--skip-gate` (CI, layout work) prints a banner on
+  the page; `--skip-stress` skips Excel only.
+- **Inputs.** Numbers come from the workbook through `model_map.json`; data blocks from `<case>_data.py` (`QUARTERS`,
+  `PEER_GROUPS`, `CONSENSUS_Q`, `HISTORY`, `META`); narrative and self-collected data from the `report` dict of
+  `<case>_deck.py` (`memo`, `thesis`, `risks_up/down`, `description`, `targets`, `owners`, `swot`, `deep_dives`,
+  `competition`, `macro`, `revision_notes`, `data_map`, `flips`, `unknowns`, `events`). `example_deck.py` shows every
+  key with fictional content. A missing block renders as a visible gap, never as a number.
+- **Rules.** Every exhibit needs a source and a date (`exhibit()` raises otherwise); estimate columns carry an EST mark;
+  paid-source data the toolkit does not have (Bloomberg/FactSet consensus by line, Visible Alpha, Similarweb) prints as
+  *not available*.
+- **Store.** Each build writes `estimates_<date>.json` and `gate.json` to the output folder; the next build diffs against
+  the latest earlier estimates for the revisions section. `--refresh-prices` caches the share and index prices in
+  `prices.json` (one Yahoo Finance call).
+- **Files.** `report/rb_core.py` (HTML blocks, formats, print CSS), `rb_charts.py` (matplotlib → inline SVG),
+  `rb_data.py` (one object with everything the sections read), `rb_sections.py` (the sections), `rb_gate.py`,
+  `rb_pdf.py` (Chromium print-to-PDF, page count, page images).

@@ -3,6 +3,9 @@ import json
 import os
 import win32com.client as w32
 
+RESULTS = []  # every snapshot, written to EQR_STRESS (default stress_<case>.json) so the report builder can read it
+KIND = ["base"]
+
 reg = json.load(open(os.environ.get("EQR_MAP", "model_map.json"), encoding="utf8"))
 C = lambda sheet, key: reg["cells"][f"{sheet}|{key}"]
 xl = w32.DispatchEx("Excel.Application")
@@ -22,9 +25,12 @@ try:
         print(f"{tag:38s} DCF {vals['dcf']:7.2f}  centre {vals['ctr']:7.2f}  TP {vals['tp']:6.1f}  "
               f"{vals['rating']:4s}  {vals['status']}  {errs if errs else ''}"
               + (f"  warnings: check {', '.join(str(int(w)) for w in warns)}" if warns else ""))
+        RESULTS.append(dict(tag=tag, kind=KIND[0], dcf=vals["dcf"], tp=vals["tp"], rating=vals["rating"], status=vals["status"],
+                            errors=[str(e) for e in errs], warnings=[int(w) for w in warns]))
         return vals
 
     base = snap("Base (as delivered)")
+    KIND[0] = "switch"
     # round trips: put each market-implied value back into the model – the DCF must equal the share price
     rd = wb.Worksheets("Reverse_DCF")
     price = inp.Range(C("Inputs", "price")).Value
@@ -97,6 +103,7 @@ try:
     meta = getattr(importlib.import_module(os.environ.get("EQR_CASE", "example_data")), "META", {}) or {}
     print()
     print("Research-driven stresses (ANALYSE.md):")
+    KIND[0] = "research"
     wb = xl.Workbooks.Open(os.path.abspath(os.environ.get("EQR_MODEL", "model_final.xlsx")), 0, True)
     inp, dcf, chk, sens = (wb.Worksheets(n) for n in ("Inputs", "DCF", "Checks", "Sensitivity"))
     drv, model, hist = wb.Worksheets("Drivers"), wb.Worksheets("Model"), wb.Worksheets("Hist")
@@ -130,3 +137,8 @@ try:
     wb.Close(False)
 finally:
     xl.Quit()
+_case = os.environ.get("EQR_CASE", "example_data").replace("_data", "")
+_out = os.environ.get("EQR_STRESS", f"stress_{_case}.json")
+with open(_out, "w", encoding="utf8") as _f:
+    json.dump(RESULTS, _f, indent=1, ensure_ascii=False)
+print(f"{len(RESULTS)} runs written to {_out}")

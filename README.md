@@ -52,6 +52,21 @@ Files in [`examples/SATS`](examples/SATS): the workbook, the full 19-slide deck 
 appendix for Q&A) and the six-slide submission version. `build_deck.py --review` builds the same deck without the team
 slide and with a neutral cover for readers outside the competition. *A case exercise, not investment advice.*
 
+## The research report
+
+`deck_builder/build_report.py` turns the same workbook and case files into a full research report – 25–40 pages, the
+structure of a sell-side initiation (`docs/rapport/struktur.md`): front page with the call and the key figures,
+investment case with scenarios and kill criteria, company overview, quarter preview, deep dives on the themes that
+decide the case, competition per market, macro, estimate revisions against the previous build, valuation (DCF, reverse
+DCF, peer groups, implied multiples), the full statements, a page on what we do not know, and disclosures with the
+build checks. The report is not built unless `verify_dcf.py`, the audit and `stress_test.py` pass; every exhibit
+carries a source and a date; estimates are marked EST; data we do not have says so.
+
+| ![Report front page](docs/img/report_example_p01.png) | ![Investment case page](docs/img/report_example_p02.png) |
+|---|---|
+
+*The fictional Example Company – every section filled with invented, labelled data (`deck_builder/example_deck.py`).*
+
 ## The workbook
 
 ![Dashboard](docs/img/xl_dashboard.png)
