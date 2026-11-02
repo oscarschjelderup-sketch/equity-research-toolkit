@@ -36,6 +36,7 @@ ap.add_argument("--skip-gate", action="store_true", help="skip verify_dcf.py and
 ap.add_argument("--skip-stress", action="store_true", help="skip stress_test.py only (no Excel)")
 ap.add_argument("--refresh-prices", action="store_true", help="fetch the share and index prices from Yahoo Finance into prices.json")
 ap.add_argument("--no-store", action="store_true", help="do not write the estimates snapshot (dry run)")
+ap.add_argument("--no-publish", action="store_true", help="do not copy the PDF and estimates to the oslo-quant home (cases/reports_pdf/<TICKER>/)")
 a = ap.parse_args()
 
 today = dt.date.fromisoformat(a.date) if a.date else dt.date.today()
@@ -85,3 +86,17 @@ if not a.html_only:
     print(f"pdf: {pdf_path} – {n} pages")
     if n is not None and not (25 <= n <= 40):
         print(f"WARNING: {n} pages is outside the 25–40 page target", file=sys.stderr)
+    if not a.no_publish and not a.no_store:
+        # the dashboard (oslo-quant) lists reports from its private home: ~/osloquant-home/cases/reports_pdf/<TICKER>/
+        import shutil
+        home = Path(os.environ.get("OSLOQUANT_HOME") or (Path.home() / "osloquant-home"))
+        if home.exists():
+            dest = home / "cases" / "reports_pdf" / str(r.ticker).upper()
+            dest.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(pdf_path, dest / pdf_path.name)
+            shutil.copyfile(r.out / f"estimates_{today.isoformat()}.json", dest / f"estimates_{today.isoformat()}.json")
+            import json as _json
+            (dest / f"meta_{today.isoformat()}.json").write_text(_json.dumps({"kind": r.rep.get("kind", ""), "title": r.rep.get("title", ""), "pages": n,
+                                                                              "gate_ok": bool(gate["ok"]), "built": today.isoformat(),
+                                                                              "source": "Equity Research Toolkit build_report.py"}, indent=1, ensure_ascii=False), encoding="utf-8")
+            print(f"published to the dashboard home: {dest}")
