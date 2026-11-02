@@ -20,6 +20,12 @@ def _yrs(r, a, b):
     return [y for y in r.years if a <= y <= b]
 
 
+def _hist_years(r):
+    """History years that have data (a short history – e.g. an IPO prospectus – leaves the early years blank)."""
+    rev = r.row("rev", r.years, "Hist")
+    return [y for y, v in zip(r.years, rev) if y <= r.last_act and isnum(v)]
+
+
 def _hdr(r, years, first=""):
     return [esc(first)] + [est_header(r.ylabel(y), r.is_est(y)) for y in years]
 
@@ -162,7 +168,7 @@ def front_page(r, prev):
         est = box("Estimate changes", "<div class='small'>First report – there are no previous estimates to compare with. "
                   "Each build stores its estimates; the next report shows old vs new.</div>", "grey")
     # ---- financial table 2021-2028
-    ys = _yrs(r, 2021, 2028)
+    ys = _yrs(r, max(2021, (_hist_years(r) or [2021])[0]), 2028)
     spec = [("Revenue (NOKm)", "rev", "n"), ("EBITDA reported (NOKm)", "ebitda", "n"), ("EBITDA after leases (NOKm)", "ebitdaal", "n"),
             ("EBIT adj. (NOKm)", "ebit_adj", "n"), ("Net profit (NOKm)", "np", "n"), ("EPS (NOK)", "eps", "n2"), ("DPS (NOK)", "dps", "n2"),
             ("Revenue growth", "g_rev", "p"), ("EBITDA after leases margin", "ebitdaal_m", "p"), ("EBIT adj. margin", "ebit_adj_m", "p"),
@@ -331,7 +337,7 @@ def company_overview(r):
         owners = placeholder("Largest shareholders not collected", "report['owners'] = dict(rows=[(name, stake)], source, date)")
     parts.append(cols(box("Financial targets (company)", tg), box("Key management", mgmt), box("Largest shareholders", owners)))
     # KPI history
-    ys = _yrs(r, r.years[0], y0)
+    ys = _hist_years(r) or _yrs(r, r.years[0], y0)
     spec = []
     for s, n in zip(SEG, names):
         spec += [(f"{n} – revenue (NOKm)", f"rev_{s}", "n"), (f"{n} – {r.c('Inputs', 'vol_unit', 'volume')}", f"vol_{s}", "n"),
@@ -737,7 +743,7 @@ def valuation(r):
         parts.append(exhibit("Peer betas – raw, debt-to-equity and unlevered (Blume-adjusted median feeds the WACC)",
                              table(["Peer", "Ctry", "Raw beta (5y monthly)", "D/E", "Tax", "Unlevered beta"], brows), r.market().get("beta_note", "Yahoo Finance"), _src_date(r)))
     # own history multiples
-    hy = _yrs(r, r.years[0], r.last_act)
+    hy = _hist_years(r) or _yrs(r, r.years[0], r.last_act)
     px_ye = r.row("price_ye", hy, "Hist")
     eps_h = r.row("eps", hy, "Hist")
     ebitdaal_h = r.row("ebitdaal", hy, "Hist")
@@ -778,7 +784,7 @@ def valuation(r):
 def financials(r):
     names = _seg_names(r)
     parts = []
-    hist = [y for y in r.years if not r.is_est(y)]
+    hist = _hist_years(r) or [y for y in r.years if not r.is_est(y)]
     fc = [y for y in r.years if r.is_est(y)]
 
     def two(title, spec, sheet, src):
