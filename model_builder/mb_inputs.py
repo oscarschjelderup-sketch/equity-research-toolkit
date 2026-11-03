@@ -110,6 +110,10 @@ def _inputs_spec():
     s.item("seg_c", "Segment C name", M.get("seg_c", "Denmark & Finland"), kind="text")
     s.item("vol_unit", "Volume KPI (unit)", M.get("vol_unit", "Customers ('000)"), kind="text", note="E.g. members, FTEs, stores, tonnes")
     s.item("norm_tax", "Normalised tax rate (historical NOPAT)", 0.22, fmt=F_PCT, note="Norwegian corporate tax rate")
+    s.blank()
+    s.section("7. Financing events after the last actual year-end")
+    s.item("eq_issue", "Net equity raised in the first forecast year", M.get("equity_issue_fc1", 0.0), fmt=F_NUM, unit="NOKm",
+           note="Share issues completed after the last actual year-end: reduce net debt and add to book equity in the first forecast year (0 if none)")
 
 
 _inputs_spec()

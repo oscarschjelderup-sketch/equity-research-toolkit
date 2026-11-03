@@ -38,6 +38,7 @@ try:
     vd0 = inp.Range(C("Inputs", "val_date")).Value
     vd0 = f"{vd0.year:04d}-{vd0.month:02d}-{vd0.day:02d}"
     pl0, py0 = inp.Range(C("Inputs", "peer_lease")).Value, inp.Range(C("Inputs", "peer_year")).Value
+    rm0 = int(inp.Range(C("Inputs", "rev_mode")).Value or 2)   # the case's own revenue build; the mode test flips it and the next test restores it
     capl0 = wb.Worksheets("Drivers").Range(f"L{reg['rows']['Drivers|b_capex_loc']}").Value
     hist = wb.Worksheets("Hist")
     pers_tot = hist.Range(f"K{reg['rows']['Hist|pers_pct']}").Value
@@ -53,17 +54,21 @@ try:
         cell.ClearContents()
     g_in = wb.Worksheets("Drivers").Range(C("Drivers", "tg_in"))
     g0 = g_in.Value
-    g_in.Value = rd.Range(C("Reverse_DCF", "rd_g")).Value
-    xl.CalculateFull()
-    print(f"Round trip: {'terminal growth -> Drivers D':40s} value {g_in.Value:.5f}  DCF {dcf.Range(C('DCF', 'dcf_ps')).Value:8.3f}  "
-          f"share price {price:.2f}")
-    g_in.Value = g0
-    xl.CalculateFull()
+    _rg = rd.Range(C("Reverse_DCF", "rd_g")).Value
+    if isinstance(_rg, (int, float)):
+        g_in.Value = _rg
+        xl.CalculateFull()
+        print(f"Round trip: {'terminal growth -> Drivers D':40s} value {g_in.Value:.5f}  DCF {dcf.Range(C('DCF', 'dcf_ps')).Value:8.3f}  "
+              f"share price {price:.2f}")
+        g_in.Value = g0
+        xl.CalculateFull()
+    else:
+        print(f"Round trip: {'terminal growth -> Drivers D':40s} not solvable ({_rg!r}) – skipped")
     tests = [
         ("Scenario = Bear", [("Inputs", "scenario", "Bear")]),
         ("Scenario = Bull", [("Inputs", "scenario", "Bull")]),
-        ("Revenue mode 1 (segments)", [("Inputs", "scenario", "Base"), ("Inputs", "rev_mode", 1)]),
-        ("Mid-year off", [("Inputs", "rev_mode", 2), ("Inputs", "midyear", 0)]),
+        (f"Revenue mode {3 - rm0} ({'segments' if rm0 == 2 else 'locations'})", [("Inputs", "scenario", "Base"), ("Inputs", "rev_mode", 3 - rm0)]),
+        ("Mid-year off", [("Inputs", "rev_mode", rm0), ("Inputs", "midyear", 0)]),
         ("Terminal FCFF method 2", [("Inputs", "midyear", 1), ("Inputs", "tv_method", 2)]),
         ("50/50 Gordon / exit multiple", [("Inputs", "tv_method", 1), ("Inputs", "w_gordon", 0.5)]),
         ("Peer basis ex leases, FY1", [("Inputs", "w_gordon", 1.0), ("Inputs", "peer_lease", 0), ("Inputs", "peer_year", 1)]),

@@ -339,11 +339,13 @@ def company_overview(r):
     # KPI history
     ys = _hist_years(r) or _yrs(r, r.years[0], y0)
     spec = []
+    mk = r.market()
+    loc_lab, rpu_lab = mk.get("loc_label", "locations"), mk.get("rpu_label", "revenue per unit (NOK/month)")
     for s, n in zip(SEG, names):
         spec += [(f"{n} – revenue (NOKm)", f"rev_{s}", "n"), (f"{n} – {r.c('Inputs', 'vol_unit', 'volume')}", f"vol_{s}", "n"),
-                 (f"{n} – locations", f"loc_{s}", "n"), (f"{n} – revenue per unit (NOK/month)", f"rpu_{s}", "n")]
+                 (f"{n} – {loc_lab}", f"loc_{s}", "n"), (f"{n} – {rpu_lab}", f"rpu_{s}", "n")]
     rows, bold, rules = _rows(r, spec, ys, "Hist")
-    parts.append(exhibit("Operating history by segment", table(_hdr(r, ys), rows), "Company reports (country pages and segment note)", f"FY {y0}"))
+    parts.append(exhibit("Operating history by segment", table(_hdr(r, ys), rows), "Company reports (segment note)", f"FY {y0}"))
     hy = [str(y) for y in ys]
     c1 = exhibit("Revenue by segment (NOKm)", bars(hy, [(n, r.row(f"rev_{s_}", ys, "Hist")) for s_, n in zip(SEG, names)], stacked=True, size=(3.4, 1.9)),
                  "Company reports (segment note)", f"FY {y0}")
@@ -447,7 +449,7 @@ def quarter_preview(r):
         rows.append([esc(lab)] + [f((q["rows"][l_]).get(key)) for l_ in show])
     for lab, key in (("EBITDA after leases margin", None), ):
         rows.append([esc(lab)] + [pct((q["rows"][l_].get("ebitdaal") or 0) / q["rows"][l_]["rev"]) if q["rows"][l_].get("rev") else "–" for l_ in show])
-    kp = [("Members ('000)", "members", "n"), ("Clubs", "clubs", "n"), ("ARPM (NOK/month)", "arpm", "n")]
+    kp = q.get("kpis") or [("Members ('000)", "members", "n"), ("Clubs", "clubs", "n"), ("ARPM (NOK/month)", "arpm", "n")]
     for lab, key, kind in kp:
         f = _fmt(kind)
         if any(q["rows"][l_].get(key) is not None for l_ in show):
@@ -457,13 +459,16 @@ def quarter_preview(r):
     segs = sorted({s for l_ in show for s in (q["rows"][l_].get("seg") or {})})
     if segs:
         rows = []
+        seg_lab = q.get("seg_ebitda_label", "country EBITDA before IFRS 16")
+        vol_lab = q.get("seg_volume_label", "volume")
         for s in segs:
-            rows.append([f"<b>{esc(s)}</b> – revenue"] + [num((q["rows"][l_].get("seg", {}).get(s) or {}).get("rev")) for l_ in show])
-            rows.append([esc(f"{s} – country EBITDA before IFRS 16")] + [num((q["rows"][l_].get("seg", {}).get(s) or {}).get("cebitda")) for l_ in show])
-            rows.append([esc(f"{s} – margin")] + [pct(((q["rows"][l_].get("seg", {}).get(s) or {}).get("cebitda") or 0) /
-                                                       (q["rows"][l_].get("seg", {}).get(s) or {}).get("rev"))
-                                                  if (q["rows"][l_].get("seg", {}).get(s) or {}).get("rev") else "–" for l_ in show])
-        parts.append(exhibit("Segments by quarter", table(hdr, rows), f"Company reports ({q['source']}, segment note and country pages)", q["date"]))
+            sv = lambda l_, k, s=s: (q["rows"][l_].get("seg", {}).get(s) or {}).get(k)  # noqa: E731
+            rows.append([f"<b>{esc(s)}</b> – revenue"] + [num(sv(l_, "rev")) for l_ in show])
+            rows.append([esc(f"{s} – {seg_lab}")] + [num(sv(l_, "cebitda")) for l_ in show])
+            rows.append([esc(f"{s} – margin")] + [pct((sv(l_, "cebitda") or 0) / sv(l_, "rev")) if sv(l_, "rev") else "–" for l_ in show])
+            if any(sv(l_, "volume") is not None for l_ in show):
+                rows.append([esc(f"{s} – {vol_lab}")] + [num(sv(l_, "volume")) for l_ in show])
+        parts.append(exhibit("Segments by quarter", table(hdr, rows), f"Company reports ({q['source']}, segment note)", q["date"]))
     return section("quarter", "Quarter preview", None, "".join(parts), 3)
 
 
@@ -526,7 +531,8 @@ def competition(r):
         if m.get("intro"):
             parts.append(p(m["intro"]))
         rows = [[md(a), esc(b), esc(c), esc(d), esc(e), esc(f), esc(g)] for a, b, c, d, e, f, g in m["rows"]]
-        tbl = exhibit(f"{market} – operators, units, prices and binding", table(["Operator", "Segment", "Units", "Price (monthly)", "Binding", "Source", "Observed"],
+        hdrs = m.get("headers") or ["Operator", "Segment", "Units", "Price (monthly)", "Binding", "Source", "Observed"]
+        tbl = exhibit(f"{market} – {m.get('title', 'operators, units, prices and binding')}", table([esc(h) for h in hdrs],
                                                                                   rows, cls="num wrap", widths=["17%", "13%", "8%", "17%", "11%", "22%", "12%"], left=range(7)),
                       m.get("source", "Operators' websites; see the Source column"), m.get("date", "see the Observed column"))
         if m.get("prices"):

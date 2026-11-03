@@ -46,3 +46,4 @@ examples/*/report/*.html
 deck_builder/_tmp_report/
 model_builder/stress_outlet.json
 /examples/OUTLT/
+model_builder/elkem_final.xlsx

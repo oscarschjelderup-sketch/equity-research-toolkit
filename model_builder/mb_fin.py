@@ -94,11 +94,13 @@ def _output_spec():
     t.row("cf_div", "Dividends paid", "NOKm", hist_from=1, hist=o("~div_paid~"), fc=o("~div_paid~"))
     t.row("cf_bb", "Share buybacks", "NOKm", hist_from=1, hist=lambda c, p, i: "=0", fc=o("~buyback~"),
           note="Forecast: cash above the target leverage on Drivers (section E) when the buyback switch is on")
+    t.row("cf_issue", "Share issues, net (first forecast year)", "NOKm", hist_from=1, hist=lambda c, p, i: "=0",
+          fc=lambda c, p, i: (f"={S('Inputs', 'eq_issue')}" if i == 0 else "=0"), note="Inputs section 7: equity raised after the last actual year-end")
     t.row("cf_other", "Other items (reported history)", "NOKm", hist_from=1,
-          hist=o("([nibd]-{nibd})-({fcfe}+{cf_acq}+{cf_div}+{cf_bb})"), fc=lambda c, p, i: "=0",
+          hist=o("([nibd]-{nibd})-({fcfe}+{cf_acq}+{cf_div}+{cf_bb}+{cf_issue})"), fc=lambda c, p, i: "=0",
           note="History: balancing item so the statement ties to the reported change in net debt")
     t.row("d_nibd", "Decrease / (increase) in net interest-bearing debt", "NOKm", bold=True, line=True, hist_from=1,
-          hist=o("{fcfe}+{cf_acq}+{cf_div}+{cf_bb}+{cf_other}"), fc=o("{fcfe}+{cf_acq}+{cf_div}+{cf_bb}+{cf_other}"))
+          hist=o("{fcfe}+{cf_acq}+{cf_div}+{cf_bb}+{cf_issue}+{cf_other}"), fc=o("{fcfe}+{cf_acq}+{cf_div}+{cf_bb}+{cf_issue}+{cf_other}"))
     t.blank()
     t.row("nibd_open", "Net interest-bearing debt – opening", "NOKm", hist_from=1, hist=o("[nibd]"), fc=o("[nibd]"))
     t.row("nibd_close", "Net interest-bearing debt – closing", "NOKm", key_row=True, hist_from=1,

@@ -67,7 +67,7 @@ def _model_spec():
     t.row("avg_loc", "Average number of locations", "#", fmt=F_NUM1, hist_from=1,
           hist=m("AVERAGE([loc],{loc})"), fc=m("AVERAGE([loc],{loc})"))
     t.row("loc_g", "Growth in the average number of locations", "%", fmt=F_PCT, italic=True, indent=1, hist_from=2,
-          hist=m("{avg_loc}/[avg_loc]-1"), fc=m("{avg_loc}/[avg_loc]-1"),
+          hist=m("IF(N([avg_loc])=0,0,{avg_loc}/[avg_loc]-1)"), fc=m("IF(N([avg_loc])=0,0,{avg_loc}/[avg_loc]-1)"),
           note="Location mode: drives fixed costs (Drivers C) and rent per location (section 2)")
     t.row("rev_loc", "Revenue per average location", "NOKm", fmt=F_NUM1, hist_from=1,
           hist=m("IF({avg_loc}=0,0,{rev}/{avg_loc})"), fc=m("IF({avg_loc}=0,0,{rev}/{avg_loc})"))
@@ -202,8 +202,8 @@ def _model_spec():
     t.row("div_paid", "Dividends paid", "NOKm", hist=HL("div_paid"), fc=m("-[dps]*[shares]"),
           note="Dividend for year t-1 is paid in year t")
     t.row("nibd_pre", "NIBD before buybacks", "NOKm", italic=True, indent=1,
-          fc=m("[nibd]-({fcff}+({netfin}+{special})*(1-<tax>))-{div_paid}"),
-          note="Opening NIBD less free cash flow to equity plus dividends")
+          fc=lambda c, p, i, f_=m("[nibd]-({fcff}+({netfin}+{special})*(1-<tax>))-{div_paid}"): f_(c, p, i) + (f"-{I('eq_issue')}" if i == 0 else ""),
+          note="Opening NIBD less free cash flow to equity plus dividends; less net equity raised (Inputs 7) in the first forecast year")
     t.row("bb_price", "Assumed buyback price", "NOK", fmt=F_NOK, italic=True, indent=1,
           fc=lambda c, p, i: f"={I('price')}*(1+{DR('bb_g')})^{i + 1}", note="Current share price grown at the rate on Drivers E")
     t.row("buyback", "Share buybacks", "NOKm", indent=1,
@@ -222,7 +222,7 @@ def _model_spec():
     t.row("other_nca", "Other non-current assets", "NOKm", hist=HL("other_nca"), fc=m("[other_nca]"), note="Held flat")
     t.row("deftax", "Deferred tax and other non-current liabilities", "NOKm", hist=HL("deftax"), fc=m("[deftax]"),
           note="Held flat")
-    t.row("equity", "Equity to shareholders (book)", "NOKm", hist=HL("equity"), fc=m("[equity]+{np_sh}+{div_paid}+{buyback}"))
+    t.row("equity", "Equity to shareholders (book)", "NOKm", hist=HL("equity"), fc=lambda c, p, i, f_=m("[equity]+{np_sh}+{div_paid}+{buyback}"): f_(c, p, i) + (f"+{I('eq_issue')}" if i == 0 else ""))
     t.row("min_bs", "Minority interests (book)", "NOKm", hist=HL("min_bs"), fc=m("[min_bs]-{min_pl}"))
     t.row("roe", "Return on equity", "%", fmt=F_PCT, italic=True, hist_from=1,
           hist=m("{np_sh}/AVERAGE([equity],{equity})"), fc=m("{np_sh}/AVERAGE([equity],{equity})"))
@@ -439,7 +439,7 @@ def _wacc_spec():
     s.item("rf", "Risk-free rate (10-year Norwegian government bond)", w["rf"], fmt=F_PCT2,
            note="Example value – update to the current 10y yield (Norges Bank)")
     s.item("erp", "Equity risk premium", w["erp"], fmt=F_PCT2, note="NFF/PwC Norwegian risk premium survey: typically about 5%")
-    s.item("bu_med", "Unlevered beta – peer median", f"=MEDIAN($M${BETA_TOP + 1}:$M${BETA_TOP + 8})", fmt=F_FAC,
+    s.item("bu_med", "Unlevered beta – peer median", f"=MEDIAN($M${BETA_TOP + 1}:$M${BETA_TOP + len(ex.PEERS)})", fmt=F_FAC,
            note="From the peer beta table to the right")
     s.item("bu_ovr", "Unlevered beta – override (optional)", None, fmt=F_FAC, note="Leave blank to use the peer median")
     s.item("bu", "Unlevered beta used", lambda: f'=IF({W("bu_ovr")}="",{W("bu_med")},{W("bu_ovr")})', fmt=F_FAC)
@@ -475,7 +475,7 @@ def _wacc_spec():
     s.item("wacc_ovr", "WACC override (optional)", None, fmt=F_PCT2, note="Leave blank to use the calculated WACC")
     s.item("wacc", "WACC used in the valuation", lambda: f'=IF({W("wacc_ovr")}="",{W("wacc_calc")},{W("wacc_ovr")})',
            fmt=F_PCT2, bold=True)
-    CELLS[("WACC", "blume")] = f"M{BETA_TOP + 12}"
+    CELLS[("WACC", "blume")] = f"M{BETA_TOP + len(ex.PEERS) + 4}"
     s.layout()
 
 
@@ -515,16 +515,17 @@ def write_wacc(wb):
         put(ws, f"K{r}", pr[11], fmt=F_PCT)
         put(ws, f"L{r}", pr[12], fmt=F_PCT)
         put(ws, f"M{r}", f"=IF({blume}=1,J{r},I{r})/(1+(1-L{r})*K{r})", fmt=F_FAC)
-    r = top + 9
+    n_ = len(ex.PEERS)
+    r = top + n_ + 1
     put(ws, f"G{r}", "Median", kind="label", bold=True)
     put(ws, f"G{r + 1}", "Mean", kind="label", bold=True)
     for col in "IJKLM":
         f = F_PCT if col in "KL" else F_FAC
-        put(ws, f"{col}{r}", f"=MEDIAN({col}{top + 1}:{col}{top + 8})", fmt=f, bold=True)
-        put(ws, f"{col}{r + 1}", f"=AVERAGE({col}{top + 1}:{col}{top + 8})", fmt=f)
+        put(ws, f"{col}{r}", f"=MEDIAN({col}{top + 1}:{col}{top + n_})", fmt=f, bold=True)
+        put(ws, f"{col}{r + 1}", f"=AVERAGE({col}{top + 1}:{col}{top + n_})", fmt=f)
     top_border(ws, r, "G", "M")
-    put(ws, f"G{top + 12}", "Apply Blume adjustment (1 = yes)", kind="label")
-    put(ws, f"M{top + 12}", ex.WACC_INPUTS["blume"], fmt=F_INT)
-    put(ws, f"G{top + 13}", ex.MARKET.get("beta_note", "Adjusted beta = 0.67 x raw + 0.33 x 1.0 (Bloomberg convention). Source: example data – replace with 2y weekly betas."),
+    put(ws, f"G{top + n_ + 4}", "Apply Blume adjustment (1 = yes)", kind="label")
+    put(ws, f"M{top + n_ + 4}", ex.WACC_INPUTS["blume"], fmt=F_INT)
+    put(ws, f"G{top + n_ + 5}", ex.MARKET.get("beta_note", "Adjusted beta = 0.67 x raw + 0.33 x 1.0 (Bloomberg convention). Source: example data – replace with 2y weekly betas."),
         kind="note", italic=True)
-    put(ws, f"G{top + 14}", "Unlevered beta = beta / (1 + (1 – tax) x D/E)", kind="note", italic=True)
+    put(ws, f"G{top + n_ + 6}", "Unlevered beta = beta / (1 + (1 – tax) x D/E)", kind="note", italic=True)
