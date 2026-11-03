@@ -158,7 +158,10 @@ print(f"  margin shift {dm * 100:+.3f}pp -> python value {dcf(forecast(mode, dm=
 print(f"  growth shift {dg * 100:+.3f}pp -> python value {dcf(forecast(mode, dg=dg))['ps']:.4f}   "
       f"(implied revenue CAGR {cell('Reverse_DCF', 'rd_cagr'):.2%} vs. ours {cell('Reverse_DCF', 'rd_cagr_ours'):.2%}; interpolated)")
 print(f"  WACC {iw:.4%}          -> python value {dcf(o, wacc=iw)['ps']:.4f}")
-print(f"  terminal growth {ig:.4%} -> python value {dcf(o, g=ig)['ps']:.4f}")
+if isinstance(ig, (int, float)):
+    print(f"  terminal growth {ig:.4%} -> python value {dcf(o, g=ig)['ps']:.4f}")
+else:
+    print(f"  terminal growth -> not solvable ({ig!r}): with the value-driver terminal value no terminal growth rate reproduces the share price (check 33)")
 
 # ---- case audit: the documented failure modes and Norwegian rules (audit.py; ANALYSE.md)
 if os.environ.get("EQR_CASE"):

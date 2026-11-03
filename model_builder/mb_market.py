@@ -224,7 +224,7 @@ def write_reverse_dcf(wb):
     _bisection(ws, WS_TOP, "E. WACC solver – bisection on the closed-form DCF (the same formula as Sensitivity table 1)",
                "WACC", f"={S('Drivers', 'tg')}+0.0025", 0.30, wacc_val)
     _bisection(ws, TS_TOP, "F. Terminal growth solver – bisection on the closed-form DCF", "terminal growth",
-               -0.05, f"={S('WACC', 'wacc')}-0.0025", g_val)
+               -0.15, f"={S('WACC', 'wacc')}-0.0025", g_val)
     # ---- chart: DCF value vs. margin shift
     put(ws, f"I{CH_ROW}", "Margin shift", kind="label", bold=True, align="right")
     put(ws, f"J{CH_ROW}", "DCF value per share", kind="label", bold=True, align="right")

@@ -62,6 +62,21 @@ The workbook is an FCFF model with a location engine (units × volume per mature
 - [ ] Valuation: EV/EBITDA on mid-cycle, backlog coverage, NAV of the fleet (broker values not available – say so)
 - [ ] Macro rows: oil price, E&P capex guidance, rig counts; deep dive on the cycle
 
+### Industrials and materials (added 3 November 2026 after the Elkem case – see examples/ELKEM/LÆRDOM.md)
+- [ ] Perimeter first: units sold, held for sale or reclassified in the last two years, and which years exist restated
+- [ ] History: fiscal years on the current perimeter (often 1-2) plus the company's own division series (CMD/CMU) with the slide as source
+- [ ] Eight quarters on the current perimeter; derive Q1/Q4 from half-year, nine-month and full-year figures and mark the derivations
+- [ ] Volume (tonnes) and realised price per division; index prices as dated points with source; the futures curve (GFEX/ZCE/LME) with its date
+- [ ] Cost per tonne: raw materials, energy (TWh, hedging ratio, contract maturities), CO2 (allowances received, compensation received per year)
+- [ ] ±10 % on the governing cost variable with disclosed quantities; say plainly when the price itself is not disclosed
+- [ ] Trade measures with regulation number and date (anti-dumping, safeguards, CBAM, US AD/CVD)
+- [ ] Balance sheet: covenants, maturities, rating, assets held for sale with the company's own valuation and sensitivity
+- [ ] Kill criteria: division margin below x % for two quarters, leverage against the covenant, the binary event (duty decision) with its date
+- [ ] Peers in two or three groups (same commodity, same customer industry, Nordic materials); betas from all, multiples only where the currencies are consistent
+- [ ] Scenarios as price paths (trough persists / slow normalisation / normalisation plus duties), not ±pp on the margin
+- [ ] Terminal margin against the through-cycle mean (audit A8) – on the company's own series when the accounting history is short
+- [ ] Model: `_unit_cost_build()` pattern for COGS, `equity_issue_fc1` for share issues after the balance-sheet year, `DIVISION_HISTORY` for the report
+
 ### Banks
 - [ ] A bank model first (not in the toolkit): loans and deposits, NIM, fees, cost/income, loan losses, risk-weighted assets, CET1, payout
 - [ ] History: ten years of the above; the loss history through 2008-09 and 2015-16 (oil)

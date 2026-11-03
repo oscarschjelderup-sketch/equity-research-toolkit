@@ -38,6 +38,7 @@ def run_verify(model, map_path, case) -> dict:
     md = re.search(r"max diff\s+revenue ([\d.e+-]+)\s+fcff ([\d.e+-]+)\s+capex ([\d.e+-]+)", out)
     price = re.search(r"reverse DCF \(share price ([\d.]+)\)", out)
     trips = re.findall(r"-> python value (-?[\d.]+)", out)
+    unsolvable = len(re.findall(r"-> not solvable", out))      # a driver the workbook cannot solve for (e.g. terminal growth with the value-driver TV)
     problems = []
     if not (py and xl and md and price):
         problems.append("could not parse the verification output")
@@ -50,12 +51,13 @@ def run_verify(model, map_path, case) -> dict:
             problems.append(f"row differences revenue/FCFF/capex {diffs}")
         p0 = float(price.group(1))
         bad = [t for t in trips if abs(float(t) - p0) > max(TOL_TRIP, 0.004 * p0)]
-        if len(trips) < 4:
+        if len(trips) + unsolvable < 4:
             problems.append(f"only {len(trips)} reverse-DCF round trips found")
         if bad:
             problems.append(f"reverse-DCF round trips off the share price {p0}: {bad}")
         item["detail"] = (f"Python {float(py.group(1)):.3f} vs Excel {float(xl.group(1)):.3f} per share; max row diff "
-                          f"{max(diffs):.3f}; {len(trips)} round trips within {max(TOL_TRIP, 0.004 * p0):.2f} of {p0:.2f}")
+                          f"{max(diffs):.3f}; {len(trips)} round trips within {max(TOL_TRIP, 0.004 * p0):.2f} of {p0:.2f}"
+                          + (f"; {unsolvable} driver not solvable (stated in the report)" if unsolvable else ""))
     item["ok"] = not problems
     if problems:
         item["detail"] = "; ".join(problems)

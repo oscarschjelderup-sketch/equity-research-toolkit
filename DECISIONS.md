@@ -181,3 +181,51 @@ the research book stay out of public repositories.
   dashboard lists them on the stock page, shows the latest estimates against the previous edition and raises a decision
   item when a report's target differs from the research-book view. The toolkit never writes to the research book or the
   judgement log: a report is an input to a decision, not the decision.
+
+## 2026-11-03 – Elkem: the first case outside consumer (examples/ELKEM)
+
+- **The company in the brief no longer exists.** The brief named Silicones, Silicon Products and Carbon Solutions and Bluestar
+  as owner. Elkem transferred the majority of Silicones to Bluestar on 30 April 2026 against the redemption of Bluestar's
+  52.9 % stake, reclassified Elkem Iceland and the retained silicones plants as held for sale, raised NOK 1.8bn of equity and
+  reports Silicon, Foundry Alloys and Carbon from Q3 2026. The case is built on the company as it is; the brief's questions
+  (segments, cycle, cost, China/Bluestar, capital allocation) are answered for the new perimeter in `data/FORSTAAELSE.md`.
+- **One year of history, on purpose.** Only 2025 exists restated on the current perimeter (Q3 2026 report). The workbook runs
+  with `HIST_START = 6`; the 2021-2025 division series from the Capital Markets Update is kept in `DIVISION_HISTORY` and used
+  in the report and in the through-cycle test (audit A8). Mixing the old structure's seven years (NOK 46bn of revenue in 2022)
+  with the new 15bn perimeter would have made every growth rate and ratio wrong.
+- **Segments = external revenue per division** (Silicon 8 945 + "Other" 403, Foundry Alloys 2 642, Carbon 2 976), so that the
+  three segments sum to group revenue; division totals incl. internal sales (9 452 / 4 181 / 3 272) are quoted where the
+  company's own margins are discussed. Volume = the division's sales volume in tonnes.
+- **Cost per tonne, not cost per krone of revenue.** Raw materials and energy are built as unit cost × volume with input inflation
+  (`_unit_cost_build()`), and the workbook receives the derived COGS share per year (47.5 % in 2026E falling to 45 % by 2028E as
+  prices recover, rising again from 2031E with the power step). This is what makes a price recovery drop through to EBITDA; a
+  fixed percentage would have hidden the operating leverage. Growth capex through sales-to-capital is switched off (s2c = 50):
+  price-led revenue needs no capital and all capex sits in maintenance capex (~100 % of D&A plus Rana).
+- **Base case below the company's target.** Silicon prices +10 % (2027E) and +5 % (2028E) from the trough, volumes flat to +2 %,
+  Foundry Alloys and Carbon at 22 % and ~27 % margins: group EBITDA 1.9bn (13 %) in 2026E, 2.6bn (17 %) in 2027E, 3.0bn (18 %)
+  in 2028E, fading to 17 % by 2033E. The >20 % target is the bull case. The bear case holds prices at the 2026 trough for eight
+  years with higher power costs (probability 30 %, bull 25 % – a cyclical with a fat downside tail).
+- **Non-operating assets at the company's own figures.** Held-for-sale net assets NOK 3 423m (Iceland ~1.3bn at an estimated
+  fair value equal to book with a 0-3.0bn range; Roussillon 1.7bn) and 1.3 million EU ETS allowances at NOK 1 200m (zero book
+  value) enter the EV bridge: NOK 13 a share, shown separately and removed in the what-if runs. The reader must be able to see
+  the value with and without them.
+- **Result:** DCF NOK 47.0 (WACC 8.1 %, terminal growth 2 %, RONIC 10 %), target NOK 48, BUY against a price of 30.92; the price
+  implies a final-year EBIT adj. margin of 7.4 % against our 10.6 % and the 10.7 % of the trough year 2025; terminal growth is not
+  solvable as a single driver (the value-driver terminal value cannot bring the DCF down to the price), which the report states.
+- **Template changes made for this case, all backwards compatible:** (1) `Inputs 7 / eq_issue` – equity raised after the last
+  actual year-end reduces net debt and adds to book equity in the first forecast year, with a matching cash-flow row (`cf_issue`);
+  without it the 2026E leverage breached the base-case kill check; (2) the WACC peer-beta table sizes itself to `len(PEERS)` (it
+  was fixed at eight rows and twelve peers overwrote the median row – Python and Excel WACC differed); (3) the terminal-growth
+  solver accepts −15 % and the gate accepts an explicitly unsolvable driver; (4) `loc_g` returns 0 when the previous average is
+  blank (one-year histories); (5) generic labels in the report: `QUARTERS['kpis']`, `seg_ebitda_label`, `seg_volume_label`,
+  `MARKET['loc_label'/'rpu_label']`, `competition[...]['headers']` – the old fitness texts remain the defaults.
+- **Not in the workbook, by design and stated as such:** segment-level costs and a segment SOTP (`sotp_runs.py` is a location
+  engine); the division economics live in the deep dives and the SOTP is a table with EST multiples. Listed as the first items to
+  build before the next industrial case (`examples/ELKEM/LÆRDOM.md`).
+- **Consensus:** Elkem publishes none; Yahoo revenue (5-6 analysts) and EPS (3) are used and named; EBITDA/EBIT/DPS and the
+  quarter are "not available". Price series: paid indices are not used; dated public points (SunSirs, Mysteel, Ferroglobe filings,
+  Argus as quoted) with a note that they are points, not a series.
+- **Prices from the oslo-quant store, not Yahoo directly** (`prices.json` written from the store's adjusted closes and its OSEBX
+  series), as the brief asked; the Yahoo symbol stays in `MARKET` for the refresh path.
+- **The research-book row stays Oscar's.** The build writes a proposal to `~/osloquant-home/cases/proposals/`; ELK is added to the
+  dashboard watchlist with the three things to watch (Silicon margin, EU review, leverage).

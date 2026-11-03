@@ -72,7 +72,17 @@ The SATS edition of 2 November 2026 (after the Q3 2026 report) is in [`examples/
 | ![SATS report front page](docs/img/sats_report_p01.png) | ![SATS investment case](docs/img/sats_report_p02.png) |
 |---|---|
 
-`docs/rapport/skalering.md` lists what a new company needs, what depends on the sector, and a checklist per sector.
+The first case outside consumer is **Elkem ASA** (3 November 2026, [`examples/ELKEM`](examples/ELKEM)): a cyclical industrial
+that changed shape in 2026 (Silicones sold to Bluestar, three new divisions, one year of restated history). The report is 24
+pages through the full gate; `examples/ELKEM/data/KILDER.md` lists every source, `data/FORSTAAELSE.md` is the understanding
+written before the model, and `LÆRDOM.md` records what in the template did not fit a commodity producer and what was changed
+(unit-cost COGS build, equity raised after the balance-sheet year, a peer table that sizes itself, generic labels).
+
+| ![Elkem report front page](docs/img/elkem_report_p01.png) | ![Elkem investment case](docs/img/elkem_report_p02.png) | ![Elkem deep dive](docs/img/elkem_report_deepdive.png) |
+|---|---|---|
+
+`docs/rapport/skalering.md` lists what a new company needs, what depends on the sector, and a checklist per sector
+(consumer, salmon, oil service, industrials and materials, banks).
 
 ## The workbook
 

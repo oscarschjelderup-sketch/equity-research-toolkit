@@ -1,0 +1,338 @@
+{
+ "ok": true,
+ "items": [
+  {
+   "name": "Checks sheet",
+   "ok": true,
+   "detail": "OK \u2013 3 WARNING(S)"
+  },
+  {
+   "name": "verify_dcf.py",
+   "ok": true,
+   "detail": "Python 47.008 vs Excel 47.008 per share; max row diff 0.000; 3 round trips within 0.12 of 30.92; 1 driver not solvable (stated in the report)",
+   "output": "revenue build: segments\npython : WACC 8.09623%  Ke 9.42886%  PV 6,596.0  PV(TV) 12,060.3  EV 18,656.3  value/share 47.008\nexcel  : WACC 8.09623%  Ke 9.42886%  PV 6,596.0  PV(TV) 12,060.3  EV 18,656.3  value/share 47.008\nmax diff  revenue 3.637978807091713e-12  fcff 2.0463630789890885e-12  capex 2.2737367544323206e-13\nrevenue    [14447, 15496, 16496, 17056, 17619, 18111, 18599, 19102]\nlocations  [19, 19, 19, 19, 19, 19, 19, 19]\ng new/lfl/px [(0, 0.09, -0.124), (0, -0.001, 0.074), (0, 0.022, 0.043), (0, 0.014, 0.02), (0, 0.013, 0.02), (0, 0.008, 0.02), (0, 0.007, 0.02), (0, 0.007, 0.02)]\nebit adj m [0.0589, 0.099, 0.1182, 0.119, 0.1185, 0.1106, 0.1081, 0.1056]\ncapex      [751, 1137, 1010, 1000, 1016, 1024, 1033, 1061]\nfcff       [1835, 829, 1169, 1394, 1269, 1226, 1249, 1247]\nroic       [0.043, 0.081, 0.1, 0.103, 0.104, 0.098, 0.097, 0.096]\neps        [None, None, None, 0.93, 0.78, 2.41, 3.29, 3.5, 3.68, 3.57, 3.63, 3.69]\nsanity    : return on new capital 2.312  benchmark 0.1  ratio 23.12\nrating    : BUY  TP 48  TSR 0.5524  excess vs Ke 0.4581  fair 43.87\n\nreverse DCF (share price 30.92):\n  margin shift -3.151pp -> python value 30.9200   (implied EBIT margin 7.41% vs. ours 10.56%)\n  growth shift -1.518pp -> python value 30.9173   (implied revenue CAGR 1.56% vs. ours 3.10%; interpolated)\n  WACC 11.0468%          -> python value 30.9200\n  terminal growth -> not solvable ('outside range'): with the value-driver terminal value no terminal growth rate reproduces the share price (check 33)\n\nCASE AUDIT \u2013 Elkem ASA\n  [MISSING  ] A10  Anchoring to management guidance: no company guidance in META['guidance']  (03 #10)\n  [MISSING  ] B29  Heuristic target / conflicts: DCF weight 70%; conflicts block: not in META  (03 #29; VPFF 3)\n  [WARN     ] A12  Stale target after bad news: model 1 days old; current price not given (--price-now)  (03 #12)\n  [WARN     ] A13  Target-price optimism: expected total return 55.2% vs Ke 9.4% (>Ke+40pp)  (03 #13, A1-A4)\n  [WARN     ] B19  Growth not paid for: workbook check: Growth is paid for: return on new capital (explicit period) vs. today's ROIC | 23.117079322576526 | WARNING  (03 #19)\n  [WARN     ] B20  Inconsistent leverage in WACC: relevering D/E 42.9% = D/V 30.0% / (1 \u2212 D/V): True; forecast D/V 22.0%  (03 #20)\n  [JUSTIFIED] A9   Commodity deck vs forward curve: model price 10230 vs forward 8530 (3 Nov 2026): +19.9%  (03 #9; 04 R24)\n              reason: The GFEX contract is Chinese domestic 553# silicon; Elkem sells into the EU behind a 16.8 % anti-dumping duty that is under review with import registration since 27 Oct 2026, and into the US behind tariffs. The model assumes EU prices decouple upwards from the Chinese curve (deep dive 2).\n  [JUSTIFIED] B17  Working capital: NWC 42.0% of revenue (3y avg) \u2192 low of 32.0% in the forecast; NWC released in 1 growth year(s) (>5pp fall)  (03 #17)\n              reason: Working capital falls from 42 % of revenue (31 Dec 2025, incl. derivatives and full-cost inventories) to 36 % at 30 Sep 2026 already; the model takes it to 32 %, still above the company's own historic level of 23 % on its definition (Feb 2026 deck). The release is the company's NOK 1bn programme, 841 of which was done by June 2026.\n  [JUSTIFIED] B21  rf / ERP / currency: rf 4.40%, ERP 5.0%, size 0.8%, specific 0.0%; equity NOK 11.2bn; size premium 0.8% vs PwC/FFN median 0% for NOK 11.2bn equity  (03 #21; 04 R2-R6)\n              reason: 0.75 % size/liquidity premium for a NOK ~11bn market cap with a rebuilt shareholder base; between the PwC/NFF median (0 %) and the SATS case's 1.0 % (WACC_INPUTS comment).\n  [JUSTIFIED] B27  Leverage, refinancing, dividends: peak NIBD/EBITDAaL 3.3x, min interest cover 1.9x: needs a distress/refinancing scenario  (03 #27)\n              reason: Leverage 3.3x at 30 Sep 2026 against covenants of 4.75x (to Mar 2027) and 4.25x, NOK 5.5bn of cash and NOK 4.5bn undrawn against NOK 0.9bn of 2027 maturities; the bear scenario (prices at the trough for eight years) is the distress case and is priced at NOK 3.6 per share \u2013 the refinancing of June 2026 runs to 2031 (deep dive 4).\n  [PASS     ] A1   Growth above base rates: revenue CAGR 3.1% nominal, 0.5% real over 8 years  (03 #1, A20)\n  [PASS     ] A11  Herding on consensus: estimates differ from consensus: -3.0%, -6.2%, -17.3%, -33.7%  (03 #11)\n  [PASS     ] A14  Skewed rating scale: BUY above Ke+5%, SELL below Ke-5% (expected total return vs cost of equity)  (03 #14)\n  [PASS     ] A15  Binary event not weighted: binary event 'EU anti-dumping interim review on Chinese silicon (initiated 1 Sep 2026; conclusion within 12-15 months)': scenario probabilities [0.3, 0.45, 0.25]  (03 #15)\n  [PASS     ] A16  Tax and regulatory regime: sector 'materials': ordinary corporate tax 25.0%  (03 #16)\n  [PASS     ] A2   Forecast range too narrow: bear 3.6 / base 47.0 / bull 87.4 per share; revenue CAGR spread bull-bear 7.1%  (03 #2, A20)\n  [PASS     ] A3   Hockey-stick margins: final-year EBIT adj. margin 10.6% vs historical max 10.7%  (03 #3)\n  [PASS     ] A4   No mean reversion: margin 10.7% vs peer median 11.9%  (03 #4)\n  [PASS     ] A5   Terminal returns not faded: terminal RONIC 10.0% / WACC 8.1% = 1.24x  (03 #5)\n  [PASS     ] A6   Terminal growth not paid for: g 2.0% \u2264 rf 4.4%; reinvestment 20.0% of NOPAT = g/RONIC  (03 #6; 04 R10-R13)\n  [PASS     ] A7   Terminal value dominance: TV 65% of EV  (03 #7; 04 R17)\n  [PASS     ] A8   Peak-cycle earnings capitalised: terminal margin 10.6% vs through-cycle mean+1SD 10.7% (1 years of history)  (03 #8; 04 R15)\n  [PASS     ] B18  Capex below depreciation while growing: capex \u2265 D&A (owned assets) in every growth year  (03 #18; 04 R13)\n  [PASS     ] B22  Reporting vs listing currency: reports and lists in NOK  (03 #22)\n  [PASS     ] B23  IFRS 16 double count / omission: FCFF after lease payments (pre-IFRS 16); bridge deducts NIBD 6,125 ex leases; lease liabilities 333 shown as memo only; peers on an IFRS 16 basis (EV incl. leases)  (03 #23; 04 R30-R32)\n  [PASS     ] B24  Incomplete EV-to-equity bridge: bridge: NIBD, minorities -130, associates 3666, pensions/other filled  (03 #24)\n  [PASS     ] B25  Share count and dilution: basic 362.5m, diluted 362.5m  (03 #25)\n  [PASS     ] B26  Stale balance sheet / dates: balance sheet 30 Sep 2026, valuation 02 Nov 2026: 33 days  (03 #26)\n  [PASS     ] B28  Exit multiple vs Gordon TV: Gordon TV implies 6.8x EV/EBITDAaL vs the exit cross-check 6.5x (+5%)  (03 #28; 04 R16)\n  [PASS     ] B30  MAR / 2016/958 disclosures: all disclosure fields present  (03 #30; 04 R37-R40)\n  MISSING 2, WARN 4, JUSTIFIED 4, PASS 20\n"
+  },
+  {
+   "name": "Case audit (ANALYSE.md \u00a74)",
+   "ok": true,
+   "detail": "MISSING 2, WARN 4, JUSTIFIED 4, PASS 20"
+  },
+  {
+   "name": "Case gate (reverse DCF)",
+   "ok": true,
+   "detail": "margin gap +3.2pp, growth gap +1.5pp, DCF +52% vs price"
+  },
+  {
+   "name": "stress_test.py",
+   "ok": true,
+   "detail": "21 runs; no ERROR on any switch",
+   "output": "Base (as delivered)                    DCF   47.01  centre   47.01  TP   48.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\nRound trip: margin shift -> EBITDA margin override   value -0.03151  DCF   30.920  share price 30.92\nRound trip: growth shift -> growth override          value -0.01518  DCF   30.917  share price 30.92\nRound trip: WACC -> WACC override                    value 0.11047  DCF   30.920  share price 30.92\nRound trip: terminal growth -> Drivers D             not solvable ('outside range') \u2013 skipped\nScenario = Bear                        DCF    3.58  centre    3.58  TP   10.0  SELL  OK \u2013 5 WARNING(S)    warnings: check 19, 20, 21, 27, 29\nScenario = Bull                        DCF   87.36  centre   87.36  TP   82.0  BUY   OK \u2013 5 WARNING(S)    warnings: check 19, 20, 21, 23, 27\nRevenue mode 2 (locations)             DCF   33.60  centre   33.60  TP   34.0  HOLD  OK \u2013 5 WARNING(S)    warnings: check 19, 20, 21, 26, 29\nMid-year off                           DCF   45.07  centre   45.07  TP   47.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\nTerminal FCFF method 2                 DCF   48.01  centre   48.01  TP   49.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 20, 21\n50/50 Gordon / exit multiple           DCF   45.64  centre   45.64  TP   47.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\nPeer basis ex leases, FY1              DCF   47.01  centre   47.01  TP   47.0  BUY   OK \u2013 4 WARNING(S)    warnings: check 19, 20, 21, 27\nNo 12m roll-forward, 100% DCF          DCF   47.01  centre   47.01  TP   47.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\nWACC override 10%                      DCF   35.28  centre   35.28  TP   39.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\nValuation date 01.03.2026              DCF   47.70  centre   47.70  TP   49.0  BUY   OK \u2013 4 WARNING(S)    warnings: check 19, 20, 21, 27\nShare price +25%                       DCF   47.01  centre   47.01  TP   48.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 23\nWACC on modelled capital structure     DCF   46.39  centre   46.39  TP   47.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\nBuybacks off (cash builds up)          DCF   47.01  centre   47.01  TP   48.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\nSales-to-capital 1.0x (capital-heavy growth) DCF   36.98  centre   36.98  TP   40.0  BUY   OK \u2013 2 WARNING(S)    warnings: check 10, 19\nCapex per new location +50%            DCF   36.98  centre   36.98  TP   40.0  BUY   OK \u2013 2 WARNING(S)    warnings: check 10, 19\nFixed cost shares 0% (all costs variable) DCF   23.79  centre   23.79  TP   30.0  SELL  OK \u2013 3 WARNING(S)    warnings: check 19, 20, 27\n\nResearch-driven stresses (ANALYSE.md):\n#4 margins revert to the last-3-year mean* DCF   11.21  centre   11.21  TP    8.0  SELL  1 ERROR(S)  ['Data-table input cells are blank']  warnings: check 19, 20, 21, 29\n#17 NWC/sales held at the last actual  DCF   44.18  centre   44.18  TP   46.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\n#21 WACC +1pp                          DCF   40.04  centre   40.04  TP   43.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\n#5 RONIC = WACC in the terminal value  DCF   45.06  centre   45.06  TP   47.0  BUY   OK \u2013 3 WARNING(S)    warnings: check 19, 21, 27\n* the margin override is a data-table input, so the workbook check on blank data-table inputs reports an ERROR by design\n21 runs written to ..\\examples\\ELKEM\\report\\stress_elkem.json\n",
+   "results": [
+    {
+     "tag": "Base (as delivered)",
+     "kind": "base",
+     "dcf": 47.007626387410305,
+     "tp": 48.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "Scenario = Bear",
+     "kind": "switch",
+     "dcf": 3.5783644344539036,
+     "tp": 10.0,
+     "rating": "SELL",
+     "status": "OK \u2013 5 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      20,
+      21,
+      27,
+      29
+     ]
+    },
+    {
+     "tag": "Scenario = Bull",
+     "kind": "switch",
+     "dcf": 87.35857916408312,
+     "tp": 82.0,
+     "rating": "BUY",
+     "status": "OK \u2013 5 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      20,
+      21,
+      23,
+      27
+     ]
+    },
+    {
+     "tag": "Revenue mode 2 (locations)",
+     "kind": "switch",
+     "dcf": 33.60140940409099,
+     "tp": 34.0,
+     "rating": "HOLD",
+     "status": "OK \u2013 5 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      20,
+      21,
+      26,
+      29
+     ]
+    },
+    {
+     "tag": "Mid-year off",
+     "kind": "switch",
+     "dcf": 45.068726757918824,
+     "tp": 47.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "Terminal FCFF method 2",
+     "kind": "switch",
+     "dcf": 48.00933057069837,
+     "tp": 49.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      20,
+      21
+     ]
+    },
+    {
+     "tag": "50/50 Gordon / exit multiple",
+     "kind": "switch",
+     "dcf": 45.635361713234694,
+     "tp": 47.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "Peer basis ex leases, FY1",
+     "kind": "switch",
+     "dcf": 47.007626387410305,
+     "tp": 47.0,
+     "rating": "BUY",
+     "status": "OK \u2013 4 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      20,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "No 12m roll-forward, 100% DCF",
+     "kind": "switch",
+     "dcf": 47.007626387410305,
+     "tp": 47.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "WACC override 10%",
+     "kind": "switch",
+     "dcf": 35.27722676601677,
+     "tp": 39.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "Valuation date 01.03.2026",
+     "kind": "switch",
+     "dcf": 47.700707836064005,
+     "tp": 49.0,
+     "rating": "BUY",
+     "status": "OK \u2013 4 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      20,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "Share price +25%",
+     "kind": "switch",
+     "dcf": 47.007626387410305,
+     "tp": 48.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      23
+     ]
+    },
+    {
+     "tag": "WACC on modelled capital structure",
+     "kind": "switch",
+     "dcf": 46.386889318381755,
+     "tp": 47.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "Buybacks off (cash builds up)",
+     "kind": "switch",
+     "dcf": 47.007626387410305,
+     "tp": 48.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "Sales-to-capital 1.0x (capital-heavy growth)",
+     "kind": "switch",
+     "dcf": 36.9792693841268,
+     "tp": 40.0,
+     "rating": "BUY",
+     "status": "OK \u2013 2 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      10,
+      19
+     ]
+    },
+    {
+     "tag": "Capex per new location +50%",
+     "kind": "switch",
+     "dcf": 36.9792693841268,
+     "tp": 40.0,
+     "rating": "BUY",
+     "status": "OK \u2013 2 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      10,
+      19
+     ]
+    },
+    {
+     "tag": "Fixed cost shares 0% (all costs variable)",
+     "kind": "switch",
+     "dcf": 23.794457091062554,
+     "tp": 30.0,
+     "rating": "SELL",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      20,
+      27
+     ]
+    },
+    {
+     "tag": "#4 margins revert to the last-3-year mean*",
+     "kind": "research",
+     "dcf": 11.212728159250755,
+     "tp": 8.0,
+     "rating": "SELL",
+     "status": "1 ERROR(S)",
+     "errors": [
+      "Data-table input cells are blank"
+     ],
+     "warnings": [
+      19,
+      20,
+      21,
+      29
+     ]
+    },
+    {
+     "tag": "#17 NWC/sales held at the last actual",
+     "kind": "research",
+     "dcf": 44.18026378468255,
+     "tp": 46.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "#21 WACC +1pp",
+     "kind": "research",
+     "dcf": 40.04296576232652,
+     "tp": 43.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    },
+    {
+     "tag": "#5 RONIC = WACC in the terminal value",
+     "kind": "research",
+     "dcf": 45.05662490264403,
+     "tp": 47.0,
+     "rating": "BUY",
+     "status": "OK \u2013 3 WARNING(S)",
+     "errors": [],
+     "warnings": [
+      19,
+      21,
+      27
+     ]
+    }
+   ]
+  }
+ ],
+ "date": "2026-11-03"
+}
