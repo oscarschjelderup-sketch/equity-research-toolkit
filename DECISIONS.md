@@ -89,3 +89,28 @@ the research book stay out of public repositories.
 - **Calibration on a common date:** returns come from the adjusted series; the quoted series is used only when it
   has the same date (it is recorded on request and lagged by three sessions on 22 Oct, which put SATS at +8.2 % instead
   of +5.8 % in the first run).
+
+## 2026-11-02 – Report generator, phase 1: the structure of a full broker report
+
+- **Reference document:** DNB Markets' 45-page update note on SATS (7 March 2025, Q1 and CMD preview). It is read for
+  structure and method only; no sentence is reproduced, and the private copy stays outside the repository
+  (`docs/rapport/struktur.md`).
+- **The eleven-section template (phase 2) follows the brief, not the note's page order:** the note is a pre-results
+  update, so its proportions (half the pages on self-collected data) tell us what to prompt a case author for, while the
+  section list of the brief tells us what every report must contain. The data map in `struktur.md` section 5 marks each
+  input Have / Collect / Missing; "Missing" prints as *not available* in the report, never as an estimate.
+- **Report language English, conversation Norwegian** – the repository's existing convention; the Norwegian file names
+  (`docs/rapport/`) are the brief's.
+- **Rendering: HTML with print CSS, printed to PDF by headless Chrome (or Edge) – not PowerPoint and not reportlab.**
+  A 25-40-page document with dense tables, footers on every exhibit and running headers is a paged document, not a deck;
+  python-pptx would need PowerPoint to export a PDF, and reportlab is not installed here. HTML keeps the content testable
+  on Linux CI (the test asserts on the HTML – sections, sources, EST marks, "not available" cells) while the PDF step runs
+  wherever a Chromium binary exists (locally, and on GitHub's Ubuntu runners). Charts are matplotlib SVG, embedded inline
+  so the HTML is one self-contained file.
+- **Previous estimates must be stored to show estimate revisions.** Every report build writes the estimate table to
+  `reports/<ticker>/estimates_<date>.json`; the next build diffs against the latest earlier file. The first report of a
+  company shows "first report – no previous estimates".
+- **Quarterly data is a new block in the data module** (`QUARTERS`: revenue, EBITDA before and after the lease
+  adjustment, EBIT, net profit, EPS and the segment lines per quarter, plus the operating KPIs). The annual model is not
+  changed; the quarter preview splits the annual forecast with the seasonality of the last two years and labels the
+  result EST.
