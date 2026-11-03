@@ -173,3 +173,11 @@ the research book stay out of public repositories.
   command; the scaling note describes what the run showed without its figures.
 - **Candidates in order:** Europris, Kid, Mowi – the first two reuse the retail pattern as it is; Mowi is the first salmon
   case and therefore a template extension.
+
+## 2026-11-02 – Report generator, phase 5: the dashboard reads the reports
+
+- **`build_report.py` publishes to the oslo-quant home** (`~/osloquant-home/cases/reports_pdf/<TICKER>/`: the PDF, the
+  estimates snapshot and a `meta_<date>.json` with kind, title, pages and the gate result) unless `--no-publish`. The
+  dashboard lists them on the stock page, shows the latest estimates against the previous edition and raises a decision
+  item when a report's target differs from the research-book view. The toolkit never writes to the research book or the
+  judgement log: a report is an input to a decision, not the decision.
