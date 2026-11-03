@@ -160,3 +160,16 @@ the research book stay out of public repositories.
   as the next edition's work, not padded.
 - **The research-book row stays the author's.** The build writes a proposed row to the private case folder
   (`~/osloquant-home/cases/proposals/`) and never to `judgements.jsonl`.
+
+## 2026-11-02 – Report generator, phase 4: scaling
+
+- **One data module and one narrative dict per company; the template does not change per company.** What changes per
+  sector is the model (`docs/rapport/skalering.md` section 2): consumer/retail/services run today; salmon and oil service
+  need driver blocks (price deck, cost per kg, backlog, day rates) and sector valuation exhibits; banks need a model that
+  does not exist in the toolkit. The checklists in section 3 are the collection work per sector.
+- **Short histories:** a company with three audited years (an IPO prospectus) prints three-year tables and charts;
+  `_hist_years()` takes the years with revenue data instead of the workbook's seven columns.
+- **The private case stays out of the repository.** Its report is built into the ignored `OUTLET/` folder with the same
+  command; the scaling note describes what the run showed without its figures.
+- **Candidates in order:** Europris, Kid, Mowi – the first two reuse the retail pattern as it is; Mowi is the first salmon
+  case and therefore a template extension.

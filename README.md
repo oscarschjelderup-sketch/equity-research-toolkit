@@ -72,6 +72,8 @@ The SATS edition of 2 November 2026 (after the Q3 2026 report) is in [`examples/
 | ![SATS report front page](docs/img/sats_report_p01.png) | ![SATS investment case](docs/img/sats_report_p02.png) |
 |---|---|
 
+`docs/rapport/skalering.md` lists what a new company needs, what depends on the sector, and a checklist per sector.
+
 ## The workbook
 
 ![Dashboard](docs/img/xl_dashboard.png)
