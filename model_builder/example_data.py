@@ -287,6 +287,68 @@ PEERS = [  # name, country, mcap, ev, evs(3), evebitda(3), evebit(3), pe(3), ebi
     ("Peer H NV", "NL", 15100, 18200, (1.5, 1.4, 1.3), (7.0, 6.5, 6.1), (12.5, 11.3, 10.5), (14.6, 13.2, 12.1), 0.121, 0.046, 1.15, 0.47, 0.258),
 ]
 
+
+# ---- report template blocks (fictional, like everything else in this file) ---------------------------------------
+# QUARTERS: reported quarters for the quarter preview and the quarterly tables of the research report. Each quarter has
+# the group lines and a `seg` dict per segment (revenue, country EBITDA before leases, members, locations). The fictional
+# quarters below are the annual figures split with a fixed seasonal pattern so that they sum to the annual history.
+_Q_SHARE = (0.235, 0.255, 0.245, 0.265)
+_Q_SHARE_P = (0.20, 0.27, 0.25, 0.28)          # profits are more seasonal than revenue
+
+
+def _quarters():
+    d = simulate()
+    out = {}
+    for yi, year in ((5, 2024), (6, 2025)):
+        rev, ebitda, lp = d["rev"][yi], d["ebitda"][yi], -d["lease_pay"][yi]
+        ebitdaal = ebitda - lp
+        ebit_adj = ebitdaal + d["da"][yi]
+        ebit, np_ = d["ebit"][yi], d["np_sh"][yi]
+        for qi in range(4):
+            sr, sp = _Q_SHARE[qi], _Q_SHARE_P[qi]
+            seg = {}
+            for s, name, cb in (("A", "Segment A", 0.30), ("B", "Segment B", 0.22), ("C", "Segment C", 0.10)):
+                srev = d["rev" + s][yi] * sr
+                seg[name] = dict(rev=round(srev), cebitda=round(srev * cb * (sp / sr)), members=d["vol" + s][yi], locations=d["loc" + s][yi])
+            out[f"Q{qi + 1} {year}"] = dict(rev=round(rev * sr), ebitda=round(ebitda * sp), ebitdaal=round(ebitdaal * sp), ebit=round(ebit * sp),
+                                              ebit_adj=round(ebit_adj * sp), np=round(np_ * sp), eps=round(np_ * sp / SHARES, 2),
+                                              members=sum(d["vol" + s][yi] for s in "ABC"), clubs=d["locations"][yi],
+                                              arpm=round(rev * sr / 3 / sum(d["vol" + s][yi] for s in "ABC") * 1000), seg=seg)
+    # two fictional quarters of 2026 (about 5 % above 2025)
+    for qi in range(2):
+        base = out[f"Q{qi + 1} 2025"]
+        q = {k: (round(v * 1.05) if isinstance(v, (int, float)) and k not in ("eps", "members", "clubs", "arpm") else v) for k, v in base.items() if k != "seg"}
+        q["eps"] = round(base["eps"] * 1.05, 2)
+        q["arpm"] = round(base["arpm"] * 1.04)
+        q["members"] = round(base["members"] * 1.01)
+        q["seg"] = {n: {kk: (round(vv * 1.05) if kk in ("rev", "cebitda") else vv) for kk, vv in sv.items()} for n, sv in base["seg"].items()}
+        out[f"Q{qi + 1} 2026"] = q
+    return out
+
+
+QUARTERS = dict(source="fictional quarterly reports (example_data.py)", date="1 Oct 2026", unit="NOKm", rows=_quarters())
+PEER_GROUPS = {"Nordic service peers (fictional)": ["Peer A ASA", "Peer B AB", "Peer C A/S", "Peer D Oyj"],
+               "International peers (fictional)": ["Peer E AB", "Peer F plc", "Peer G SE", "Peer H NV"]}
+CONSENSUS_Q = dict(source="fictional quarterly consensus", date="1 Oct 2026", rev=1480, eps=2.05, n=4)   # one line each, like Yahoo
+HISTORY = [("2026-10-01", "BUY", 146, 122.0, "Initiation (fictional)")]
+
+# ---- audit inputs (model_builder/audit.py). Fictional, like the rest of the file; the reasons show the form an answer takes.
+META = dict(
+    sector="consumer", cyclical=False, commodity=None, binary_event=None, reporting_currency="NOK", last_share_issue=None,
+    guidance=dict(ebit_margin=None), conflicts="None – fictional example company; the author holds no position",
+    disclosures=dict(
+        author="Case author (fictional example)", price_datetime="Share price of the model date, close (fictional)",
+        rating_definitions="BUY: 12-month expected total return above the cost of equity + 5pp; SELL: below Ke − 5pp; HOLD in between",
+        valuation_summary="70% DCF (FCFF after lease payments, value-driver terminal value) + 30% peer multiples, rolled forward 12 months",
+        update_frequency="After each quarterly report", history_12m="HISTORY in this module (one fictional call)",
+        status="Fictional example – not investment research or advice",
+    ),
+    reasons=dict(
+        A4="Fictional: the margin rises because fixed location costs are spread over price increases; the peer median is on an IFRS 16 basis and not like-for-like.",
+        B21="Fictional: a 1.0% size/liquidity premium is kept for a thinly traded share although the equity value is above NOK 5bn; shown as a what-if.",
+    ),
+)
+
 if __name__ == "__main__":
     d = simulate()
     for k in ["rev", "ebitda", "ebit", "pbt", "np_sh", "cash", "equity", "minority_bs", "cfo", "ocl", "rou", "ppe"]:

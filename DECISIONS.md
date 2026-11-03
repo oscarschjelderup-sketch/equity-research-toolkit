@@ -114,3 +114,28 @@ the research book stay out of public repositories.
   adjustment, EBIT, net profit, EPS and the segment lines per quarter, plus the operating KPIs). The annual model is not
   changed; the quarter preview splits the annual forecast with the seasonality of the last two years and labels the
   result EST.
+
+## 2026-11-02 – Report generator, phase 2: the template
+
+- **One builder, eleven sections, in `deck_builder/`** (`build_report.py` + `report/`), next to the deck builder because it
+  reads the same `model_map.json`, `deck_data.ModelData` and case modules. The deck is unchanged.
+- **The gate is part of the builder, not a separate step:** `rb_gate.evaluate` runs the Checks sheet, `verify_dcf.py`
+  (parsed), the audit, the case gate and `stress_test.py` before a single section is rendered, and the result is printed
+  in the disclosures. `stress_test.py` now writes `stress_<case>.json` (the report's stress table reads it) – a
+  twelve-line addition, no change to what it tests. `--skip-gate` exists for CI and layout work and is visible on the page.
+- **Section 4 (quarter preview) splits the annual model, it does not forecast quarters.** Our quarter = the full-year
+  forecast × the average share of that quarter in the last full years, labelled EST and explained in the exhibit note.
+  A separate quarterly model would double the driver set for little gain; the honest reading is "run-rate against the
+  annual estimate".
+- **Consensus:** Yahoo's revenue and EPS means (annual and current quarter) are the only consensus shown; EBITDA, EBIT,
+  DPS and segment consensus print *not available* with the name of the source the sell side uses.
+- **Own-history multiples instead of a forward P/E history:** trailing P/E and EV/EBITDA after leases at year-end prices
+  from the company's own numbers, plus today's price on our first forecast year, labelled as such. A consensus-based
+  forward history needs Bloomberg and is listed under what we do not know.
+- **Peer groups** come from `PEER_GROUPS` in the data module (name → peer names from `PEERS`); the implied value per
+  share by group uses min / median / max of the group's NTM multiple on the model's metric for the Comps year.
+- **The fictional Example Company carries the template test** (`example_deck.py`, `QUARTERS`, `PEER_GROUPS`, `META` in
+  `example_data.py`): every optional block filled with invented, labelled data, so CI exercises every code path without a
+  real company; SATS is filled in phase 3.
+- **Outputs:** `examples/<TICKER>/report/` holds the PDF, `prices.json`, `estimates_<date>.json`, `gate.json`; the HTML
+  is git-ignored (regenerated). Private cases pass `--out-dir` to an ignored folder.

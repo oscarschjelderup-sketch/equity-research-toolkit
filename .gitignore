@@ -40,3 +40,9 @@ model_builder/fin.log
 blindtest/out/
 blindtest/specs/private-*.yaml
 *.key.json
+
+# Research report builds: HTML is regenerated from the PDF source; temporary and private outputs stay local
+examples/*/report/*.html
+deck_builder/_tmp_report/
+model_builder/stress_outlet.json
+/examples/OUTLT/
