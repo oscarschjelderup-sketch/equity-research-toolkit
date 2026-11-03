@@ -180,7 +180,10 @@ python stress_test.py
 Without `EQR_CASE` the builders use the fictional Example Company ASA (`example_data.py`), which is what
 `Equity_Research_DCF_Toolkit.xlsx` at the root contains. `pytest` runs the tests.
 
-**A new company** is a copy of `model_builder/sats_data.py` with the same keys filled in – seven years of history,
+**A new company** starts with `python model_builder/new_case.py CODE --name "..." --sector industrials`: it reads the statements the
+oslo-quant dashboard exported (`oq case export CODE`) and writes a data module with the history filled from them, a narrative skeleton and
+the two markdown pages (`KILDER.md`, `FORSTAAELSE.md` with the sector checklist). The module is marked `SCAFFOLD` – the report gate refuses
+it – until every TODO/PLUG/TEMPLATE line is replaced with a sourced figure. The result is a module like `model_builder/sats_data.py` with the same keys filled in – seven years of history,
 market data, drivers, scenarios, consensus, the variant perception, kill criteria and peers. `simulate()` refuses to
 build if a balance sheet does not balance or a cash flow does not tie. Company-specific slide text goes in
 `deck_builder/<company>_deck.py`. Details in [`model_builder/README.md`](model_builder/README.md) and

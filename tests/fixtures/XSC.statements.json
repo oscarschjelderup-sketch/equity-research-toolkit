@@ -1,0 +1,191 @@
+{
+ "code": "XSC",
+ "name": "Scaffold Example ASA",
+ "group": "Industrials & materials",
+ "exported_at": "2026-11-03T12:00:00Z",
+ "prices_ye": {
+  "2023-12-31": {
+   "close": 40.0,
+   "date": "2023-12-29"
+  },
+  "2024-12-31": {
+   "close": 44.0,
+   "date": "2024-12-30"
+  },
+  "2025-12-31": {
+   "close": 38.0,
+   "date": "2025-12-30"
+  }
+ },
+ "price": {
+  "value": 41.5,
+  "date": "2026-11-02",
+  "source": "fictional"
+ },
+ "shares": 100000000.0,
+ "currency": {
+  "reporting": "NOK",
+  "fx": 1.0,
+  "fx_date": null,
+  "source": "fictional"
+ },
+ "unit": "absolute",
+ "annual": {
+  "income": [
+   {
+    "total_revenue": 1000000000.0,
+    "cost_of_revenue": 600000000.0,
+    "gross_profit": 400000000.0,
+    "operating_income": 100000000.0,
+    "ebitda": 150000000.0,
+    "ebit": 100000000.0,
+    "interest_expense": 40000000.0,
+    "pretax_income": 80000000.0,
+    "tax_provision": 20000000.0,
+    "net_income": 58000000.0,
+    "basic_eps": 0.58,
+    "diluted_eps": 0.58,
+    "diluted_shares": 100000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2023-12-31"
+   },
+   {
+    "total_revenue": 1100000000.0,
+    "cost_of_revenue": 650000000.0,
+    "gross_profit": 450000000.0,
+    "operating_income": 115000000.0,
+    "ebitda": 170000000.0,
+    "ebit": 115000000.0,
+    "interest_expense": 40000000.0,
+    "pretax_income": 95000000.0,
+    "tax_provision": 24000000.0,
+    "net_income": 69000000.0,
+    "basic_eps": 0.69,
+    "diluted_eps": 0.69,
+    "diluted_shares": 100000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2024-12-31"
+   },
+   {
+    "total_revenue": 1050000000.0,
+    "cost_of_revenue": 640000000.0,
+    "gross_profit": 410000000.0,
+    "operating_income": 85000000.0,
+    "ebitda": 140000000.0,
+    "ebit": 85000000.0,
+    "interest_expense": 40000000.0,
+    "pretax_income": 60000000.0,
+    "tax_provision": 15000000.0,
+    "net_income": 44000000.0,
+    "basic_eps": 0.44,
+    "diluted_eps": 0.44,
+    "diluted_shares": 100000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2025-12-31"
+   }
+  ],
+  "balance": [
+   {
+    "total_assets": 1500000000.0,
+    "current_assets": 500000000.0,
+    "cash_and_equivalents": 100000000.0,
+    "goodwill_and_intangibles": 50000000.0,
+    "total_liabilities": 900000000.0,
+    "current_liabilities": 300000000.0,
+    "total_debt": 500000000.0,
+    "net_debt": 400000000.0,
+    "total_equity": 600000000.0,
+    "minority_interest": 10000000.0,
+    "shares_outstanding": 100000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2023-12-31"
+   },
+   {
+    "total_assets": 1600000000.0,
+    "current_assets": 540000000.0,
+    "cash_and_equivalents": 120000000.0,
+    "goodwill_and_intangibles": 50000000.0,
+    "total_liabilities": 940000000.0,
+    "current_liabilities": 320000000.0,
+    "total_debt": 520000000.0,
+    "net_debt": 400000000.0,
+    "total_equity": 660000000.0,
+    "minority_interest": 12000000.0,
+    "shares_outstanding": 100000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2024-12-31"
+   },
+   {
+    "total_assets": 1580000000.0,
+    "current_assets": 520000000.0,
+    "cash_and_equivalents": 90000000.0,
+    "goodwill_and_intangibles": 50000000.0,
+    "total_liabilities": 930000000.0,
+    "current_liabilities": 330000000.0,
+    "total_debt": 540000000.0,
+    "net_debt": 450000000.0,
+    "total_equity": 650000000.0,
+    "minority_interest": 14000000.0,
+    "shares_outstanding": 100000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2025-12-31"
+   }
+  ],
+  "cashflow": [
+   {
+    "operating_cash_flow": 130000000.0,
+    "capital_expenditure": -60000000.0,
+    "free_cash_flow": 70000000.0,
+    "dividends_paid": -20000000.0,
+    "repurchase_of_stock": null,
+    "depreciation_and_amortization": 50000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2023-12-31"
+   },
+   {
+    "operating_cash_flow": 150000000.0,
+    "capital_expenditure": -70000000.0,
+    "free_cash_flow": 80000000.0,
+    "dividends_paid": -25000000.0,
+    "repurchase_of_stock": null,
+    "depreciation_and_amortization": 55000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2024-12-31"
+   },
+   {
+    "operating_cash_flow": 120000000.0,
+    "capital_expenditure": -65000000.0,
+    "free_cash_flow": 55000000.0,
+    "dividends_paid": -25000000.0,
+    "repurchase_of_stock": null,
+    "depreciation_and_amortization": 55000000.0,
+    "name": "Scaffold Example",
+    "report_period": "year",
+    "report_date": "2025-12-31"
+   }
+  ]
+ },
+ "quarterly": {
+  "income": [
+   {
+    "total_revenue": 260000000.0,
+    "ebitda": 35000000.0,
+    "ebit": 20000000.0,
+    "net_income": 10000000.0,
+    "report_period": "quarter",
+    "report_date": "2026-09-30"
+   }
+  ],
+  "balance": [],
+  "cashflow": []
+ },
+ "source": "fictional fixture for tests"
+}

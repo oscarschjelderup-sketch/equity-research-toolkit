@@ -1,6 +1,6 @@
 """The build gate: the report is not built unless the model passes.
 
-Four checks, in order:
+Four checks, in order (after a refusal of any SCAFFOLD module written by new_case.py):
   1. the workbook's own Checks sheet reports no ERROR;
   2. `verify_dcf.py` reproduces the Excel DCF in Python and every reverse-DCF round trip returns the share price;
   3. the case audit (ANALYSE.md section 4) has no FAIL or FLAG and the case gate (reverse DCF, ≥ 10 % vs price) passes;
@@ -81,9 +81,20 @@ def run_stress(model, map_path, case, out_json: Path) -> dict:
     return item
 
 
+def scaffold_block(rep) -> str | None:
+    """A data module written by new_case.py carries SCAFFOLD = True until its TODO/PLUG/TEMPLATE lines are replaced; a
+    report must not be built from it (the drivers would be the fictional Example Company's)."""
+    if getattr(getattr(rep, "mod", None), "SCAFFOLD", False):
+        return "the data module is a SCAFFOLD (new_case.py): replace every TODO/PLUG/TEMPLATE line and remove SCAFFOLD before building a report"
+    return None
+
+
 def evaluate(rep, skip_stress=False, skip_verify=False) -> dict:
     """Run the gate on a `rb_data.Report`. Returns dict(ok, items=[...]) and writes gate.json in the output folder."""
     items = []
+    sb = scaffold_block(rep)
+    if sb:
+        items.append(dict(name="Scaffold", ok=False, detail=sb))
     master = rep.master()
     items.append(dict(name="Checks sheet", ok="ERROR" not in master.upper(), detail=master))
     if skip_verify:

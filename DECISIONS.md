@@ -229,3 +229,24 @@ the research book stay out of public repositories.
   series), as the brief asked; the Yahoo symbol stays in `MARKET` for the refresh path.
 - **The research-book row stays Oscar's.** The build writes a proposal to `~/osloquant-home/cases/proposals/`; ELK is added to the
   dashboard watchlist with the three things to watch (Silicon margin, EU review, leverage).
+
+## 2026-11-03 – The case factory: a new company starts from the statements the dashboard already holds
+
+`model_builder/new_case.py CODE --name --sector` reads `~/osloquant-home/cases/<CODE>.statements.json` (every annual and
+quarterly line Yahoo Finance reports, exported by `oq case export` in oslo-quant) and writes four files: the data module
+with the history filled in, the report narrative with every key present and empty, and `KILDER.md` / `FORSTAAELSE.md`
+with the sector checklist from `docs/rapport/skalering.md` pasted in as questions. Three rules decided how far it goes:
+
+- **It invents nothing.** Where Yahoo does not split what the workbook splits (personnel vs other opex, leases, inventories
+  vs receivables, current vs non-current debt) the figure sits on one line and the line says so; the financing line of the
+  cash flow is a named PLUG that ties it to the balance sheet; year-end DPS is marked DERIVED. Yahoo's totals are kept, so
+  the balance sheet balances and the workbook builds at once.
+- **The drivers are the fictional Example Company's, and say so.** `BASE`, `SCENARIO_ADJ`, `TERMINAL`, `WACC_INPUTS` and
+  `COST_CAPITAL` are imported from `example_data` and marked TEMPLATE; the kill list has the five usual criteria with no
+  thresholds; peers, consensus, variant and stories are empty.
+- **A scaffold cannot become a report.** The module carries `SCAFFOLD = True`; `rb_gate.scaffold_block` makes the build
+  gate fail on it, so the first report of a new company is only built after every TODO/PLUG/TEMPLATE has been replaced
+  and the flag removed. The workbook, by contrast, builds immediately, so the history can be read in Excel on day one.
+
+Tested on a fictional export (`tests/fixtures/XSC.statements.json`): the module imports beside the template, balances,
+and `build_model.py` builds a workbook from it. Dekning 2026-11-03, part 3 (the dashboard side is oslo-quant D38-D40).
