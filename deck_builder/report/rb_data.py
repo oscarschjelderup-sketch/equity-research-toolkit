@@ -30,6 +30,19 @@ ALL = HC + FC
 EST_ROWS = ["rev", "rev_a", "rev_b", "rev_c", "ebitda", "ebitdaal", "ebit_adj", "np", "eps", "dps", "fcff"]
 
 
+def kill_list_of(mod, case: str, model_date) -> dict:
+    """KILL (workbook rows with thresholds) and KILL_TEXT (criteria the rows cannot carry) of a data module as one
+    machine-readable list: label, row key, direction, threshold, buffer, format and the sentence."""
+    rows = []
+    for lab, key, direction, th, buf, kind in getattr(mod, "KILL", []) or []:
+        if th is None:
+            continue
+        val = f"{th * 100:.1f} %" if kind == "pct" else f"{th:.2f}x"
+        rows.append(dict(label=lab, row=key, op="below" if direction == "below" else "above", threshold=th, buffer=buf, fmt=kind,
+                         text=f"{lab} {direction} {val}"))
+    return dict(model=rows, text=[str(t) for t in getattr(mod, "KILL_TEXT", []) or []], source=f"{case}.py KILL / KILL_TEXT, model {model_date}")
+
+
 def _num(x) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool)
 
@@ -327,11 +340,16 @@ class Report:
         return self._json_near("EQR_SOTP", f"sotp_{short}.json")
 
     # ---------------------------------------------------------------- estimates store (for the revisions section)
+    def kill_list(self) -> dict:
+        """The case's kill criteria as the data module states them – the one list the research book, the dashboard's
+        report reader and the proposed judgement row are checked against (oslo-quant D40)."""
+        return kill_list_of(self.mod, self.case, self.model_date)
+
     def estimates(self) -> dict:
         yrs = [y for y in self.years if self.is_est(y)]
         rows = {k: self.row(k, yrs) for k in EST_ROWS}
         return dict(date=self.today.isoformat(), price=self.price, price_date=str(self.price_date), tp=self.tp, rating=self.rating,
-                    dcf_ps=self.c("DCF", "dcf_ps"), years=yrs, rows=rows, model_date=str(self.model_date))
+                    dcf_ps=self.c("DCF", "dcf_ps"), years=yrs, rows=rows, model_date=str(self.model_date), kill=self.kill_list())
 
     def save_estimates(self) -> Path:
         p = self.out / f"estimates_{self.today.isoformat()}.json"

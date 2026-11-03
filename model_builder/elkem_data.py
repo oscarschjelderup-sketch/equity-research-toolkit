@@ -285,9 +285,13 @@ KILL = [  # KPI label, Model row key, kill if ('below'/'above'), threshold, watc
     ("NIBD / EBITDAaL", "lev", "above", 4.00, 0.50, "mult"),
     ("EBITDA margin (reported)", "ebitda_m", "below", 0.080, 0.030, "pct"),
 ]
-# Division-level kill criteria that the workbook rows cannot carry (measured in the quarterly report): Silicon EBITDA margin below 5 % for two
-# consecutive quarters; Foundry Alloys EBITDA margin below 18 % in any quarter; the EU interim review ending without a higher duty on Chinese
-# silicon. They are printed on the thesis page of the report and in the proposed research-book row.
+# Division-level kill criteria that the workbook rows cannot carry (measured in the quarterly report). They are exported with the report's
+# estimates (kill_list) so the research-book row and the dashboard's reader are checked against the same list (oslo-quant D40).
+KILL_TEXT = [
+    "Elkem Silicon EBITDA margin below 5 % for two consecutive quarters (Q3 2026: 6 %)",
+    "Elkem Foundry Alloys EBITDA margin below 18 % in any quarter (21-22 % for seven quarters)",
+    "EU interim review on Chinese silicon ends without a higher duty (conclusion due 1 Sep-1 Dec 2027)",
+]
 
 # Peers [YF, 3 Nov 2026]. Market cap and EV in NOKm (Yahoo FX of the day: EUR 10.34, USD 9.24, SEK 0.944, JPY 0.0585, INR 0.0976, CNY 1.386,
 # AUD 6.44). Multiples: FY0 = trailing twelve months (Yahoo), FY1 = forward P/E only; NTM EV multiples and EV/EBIT are not public (blank – the

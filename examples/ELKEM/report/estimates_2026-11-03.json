@@ -127,5 +127,60 @@
    1247.1961487833014
   ]
  },
- "model_date": "2026-11-03"
+ "model_date": "2026-11-03",
+ "kill": {
+  "model": [
+   {
+    "label": "EBIT adj. margin (pre-IFRS 16)",
+    "row": "ebit_adj_m",
+    "op": "below",
+    "threshold": 0.03,
+    "buffer": 0.02,
+    "fmt": "pct",
+    "text": "EBIT adj. margin (pre-IFRS 16) below 3.0 %"
+   },
+   {
+    "label": "Group volume growth",
+    "row": "g_volc",
+    "op": "below",
+    "threshold": -0.05,
+    "buffer": 0.02,
+    "fmt": "pct",
+    "text": "Group volume growth below -5.0 %"
+   },
+   {
+    "label": "Cash conversion (FCFF / EBITDAaL)",
+    "row": "cconv",
+    "op": "below",
+    "threshold": 0.0,
+    "buffer": 0.1,
+    "fmt": "pct",
+    "text": "Cash conversion (FCFF / EBITDAaL) below 0.0 %"
+   },
+   {
+    "label": "NIBD / EBITDAaL",
+    "row": "lev",
+    "op": "above",
+    "threshold": 4.0,
+    "buffer": 0.5,
+    "fmt": "mult",
+    "text": "NIBD / EBITDAaL above 4.00x"
+   },
+   {
+    "label": "EBITDA margin (reported)",
+    "row": "ebitda_m",
+    "op": "below",
+    "threshold": 0.08,
+    "buffer": 0.03,
+    "fmt": "pct",
+    "text": "EBITDA margin (reported) below 8.0 %"
+   }
+  ],
+  "text": [
+   "Elkem Silicon EBITDA margin below 5 % for two consecutive quarters (Q3 2026: 6 %)",
+   "Elkem Foundry Alloys EBITDA margin below 18 % in any quarter (21-22 % for seven quarters)",
+   "EU interim review on Chinese silicon ends without a higher duty (conclusion due 1 Sep-1 Dec 2027)"
+  ],
+  "source": "elkem_data.py KILL / KILL_TEXT, model 2026-11-03"
+ }
 }

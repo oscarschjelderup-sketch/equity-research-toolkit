@@ -127,5 +127,56 @@
    946.31761784332
   ]
  },
- "model_date": "2026-11-02"
+ "model_date": "2026-11-02",
+ "kill": {
+  "model": [
+   {
+    "label": "Price/mix growth, group",
+    "row": "g_pxc",
+    "op": "below",
+    "threshold": 0.015,
+    "buffer": 0.01,
+    "fmt": "pct",
+    "text": "Price/mix growth, group below 1.5 %"
+   },
+   {
+    "label": "Like-for-like volume growth, group",
+    "row": "g_lflc",
+    "op": "below",
+    "threshold": -0.01,
+    "buffer": 0.01,
+    "fmt": "pct",
+    "text": "Like-for-like volume growth, group below -1.0 %"
+   },
+   {
+    "label": "EBIT adj. margin (pre-IFRS 16)",
+    "row": "ebit_adj_m",
+    "op": "below",
+    "threshold": 0.1,
+    "buffer": 0.01,
+    "fmt": "pct",
+    "text": "EBIT adj. margin (pre-IFRS 16) below 10.0 %"
+   },
+   {
+    "label": "Cash conversion (FCFF / EBITDAaL)",
+    "row": "cconv",
+    "op": "below",
+    "threshold": 0.35,
+    "buffer": 0.1,
+    "fmt": "pct",
+    "text": "Cash conversion (FCFF / EBITDAaL) below 35.0 %"
+   },
+   {
+    "label": "NIBD / EBITDAaL",
+    "row": "lev",
+    "op": "above",
+    "threshold": 2.0,
+    "buffer": 0.25,
+    "fmt": "mult",
+    "text": "NIBD / EBITDAaL above 2.00x"
+   }
+  ],
+  "text": [],
+  "source": "sats_data.py KILL / KILL_TEXT, model 2026-11-02"
+ }
 }
