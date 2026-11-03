@@ -359,6 +359,8 @@ class Report:
         sym = m.get("yahoo", f"{self.ticker}.OL")
         idx = m.get("index_yahoo", "OSEBX.OL")
         px = yf.download([sym, idx], period=f"{months}mo", interval="1d", auto_adjust=False, progress=False)["Close"].dropna(how="all")
+        if len(px) and px.index[-1].date() == dt.date.today():
+            px = px.iloc[:-1]            # today's row is an intraday quote until the close – the report uses closes only
         out = dict(symbol=sym, index=idx, fetched=dt.date.today().isoformat(), source="Yahoo Finance (daily close)",
                    dates=[d.strftime("%Y-%m-%d") for d in px.index],
                    close=[None if v != v else round(float(v), 3) for v in px[sym]],

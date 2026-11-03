@@ -229,6 +229,25 @@ def investment_case(r):
     thesis = rep.get("thesis")
     if thesis:
         parts.append(h2("The investment case in four points") + ul(thesis))
+    since = rep.get("since_last")
+    if since:
+        srows = [[md(a), md(b), md(c), _tag(d, {"confirmed": "ok", "on track": "ok", "weaker": "watch", "watch": "watch", "broken": "broken"}.get(str(d).lower(), "na"))]
+                 for a, b, c, d in since]
+        parts.append(exhibit("Since the last edition – what we said, what the company reported, where it leaves the thesis",
+                             table(["Topic", "What we said", "What was reported since", "Verdict"], srows, cls="num wrap", widths=["14%", "34%", "40%", "12%"], left=(1, 2)),
+                             rep.get("since_last_source", "Previous edition; company reports"), _src_date(r)))
+    ev = r.events()
+    if ev:
+        sig = [sc["base"]["signpost"], sc["bear"]["signpost"], sc["bull"]["signpost"]]
+        erows = [[esc(fmt_date(d)), esc(lab), md(sig[i % 3] if i < 3 else "–"), esc(src)] for i, (d, lab, src) in enumerate(ev[:6])]
+        parts.append(exhibit("Signposts calendar – the next events and what each one has to show", table(["Date", "Event", "What to watch (scenario signposts)", "Source"], erows,
+                                                                                                           cls="num wrap", widths=["12%", "22%", "44%", "22%"], left=(1, 2, 3)),
+                             "Company financial calendar (data module EVENTS); Thesis sheet signposts", _src_date(r)))
+    if var:
+        vrows = [[md(v["topic"]), md(v["ours"]), md(v["cons"]), md(v["why"]), md(v["when"]), esc(v["num"])] for v in var]
+        parts.append(exhibit("Where we differ from consensus – the evidence, and when we find out",
+                             table(["Topic", "Our view", "Consensus / the market", "Why we differ – the evidence", "What proves it, and when", "In numbers"], vrows,
+                                   cls="num wrap", widths=["10%", "20%", "18%", "24%", "16%", "12%"], left=range(6)), "Case model (Consensus sheet); consensus as stated there", _src_date(r)))
     # scenario table
     rows = []
     for s, lab in (("bear", "Bear"), ("base", "Base"), ("bull", "Bull")):
@@ -401,8 +420,20 @@ def quarter_preview(r):
         parts.append(exhibit(f"{nxt_label} – our estimate against last year and consensus", table(hdr, rows), src, q["date"], note=est_note))
     else:
         parts.append(placeholder("Seasonality split not possible", "the preview needs at least one full year of quarters in QUARTERS"))
-    # last eight quarters
     show = labels[-8:]
+    try:
+        qx = [l_.replace(" 20", " ") for l_ in show]
+        c1 = exhibit("Revenue and EBITDA after leases by quarter (NOKm)",
+                     bars(qx, [("Revenue", [q["rows"][l_].get("rev") for l_ in show]), ("EBITDA after leases", [q["rows"][l_].get("ebitdaal") for l_ in show])], size=(3.4, 1.9)),
+                     f"Company reports ({q['source']})", q["date"])
+        c2 = exhibit("Margins by quarter (before IFRS 16)",
+                     line(qx, [("EBITDA after leases margin", [(q["rows"][l_].get("ebitdaal") or 0) / q["rows"][l_]["rev"] if q["rows"][l_].get("rev") else None for l_ in show]),
+                               ("EBIT adj. margin", [(q["rows"][l_].get("ebit_adj") or 0) / q["rows"][l_]["rev"] if (q["rows"][l_].get("rev") and q["rows"][l_].get("ebit_adj") is not None) else None for l_ in show])],
+                          unit="%", markers=True, size=(3.4, 1.9)), f"Company reports ({q['source']})", q["date"])
+        parts.append(cols(c1, c2))
+    except (KeyError, ZeroDivisionError, TypeError):
+        pass
+    # last eight quarters
     hdr = [esc("NOKm")] + [esc(l_) for l_ in show]
     rows = []
     for lab, key, kind in lines:
@@ -697,6 +728,14 @@ def valuation(r):
             parts.append(exhibit(f"Implied value per share by peer group – {r.ylabel(yr)} metrics on the group's NTM multiples",
                                  table(["Group", "Multiple", "n", "Min", "Median", "Max", "Value @ min", "Value @ median", "Value @ max"], trows, left=(1,)),
                                  "Case model; peer multiples from Yahoo Finance (data module)", _src_date(r)))
+    if peers:
+        brows = []
+        for pz in peers:
+            name, ctry, mcap, ev, evs, evebitda, evebit, pe, margin, growth, beta, de, tax = pz[:13]
+            bu = beta / (1 + (1 - tax) * de) if all(isnum(v) for v in (beta, de, tax)) else None
+            brows.append([esc(name), esc(ctry), num(beta, 2), pct(de, 0), pct(tax, 0), num(bu, 2)])
+        parts.append(exhibit("Peer betas – raw, debt-to-equity and unlevered (Blume-adjusted median feeds the WACC)",
+                             table(["Peer", "Ctry", "Raw beta (5y monthly)", "D/E", "Tax", "Unlevered beta"], brows), r.market().get("beta_note", "Yahoo Finance"), _src_date(r)))
     # own history multiples
     hy = _yrs(r, r.years[0], r.last_act)
     px_ye = r.row("price_ye", hy, "Hist")
@@ -721,6 +760,11 @@ def valuation(r):
                         hline=(statistics.mean(ev_vals), f"avg {statistics.mean(ev_vals):.1f}x") if ev_vals else None),
                    "Company reports; Yahoo Finance (year-end prices); case model", _src_date(r))
     parts.append(cols(own1, own2))
+    dps_h = r.row("dps", hy, "Hist")
+    hv = [[esc(str(y)), num(pz, 2), num(e, 2), num(dv, 2), mult(pe_), mult(ev_), pct(dv / pz) if (isnum(dv) and isnum(pz) and pz) else "–"]
+          for y, pz, e, dv, pe_, ev_ in zip(hy, px_ye, eps_h, dps_h, pe_h, evx_h)]
+    parts.append(exhibit("Historical valuation at year-end prices", table(["Year", "Price (year end)", "EPS", "DPS", "P/E", "EV / EBITDA after leases", "Dividend yield"], hv),
+                         "Company reports; Yahoo Finance (year-end prices)", _src_date(r)))
     parts.append(_implied_grid(r, H))
     # football
     fb = r.football()
@@ -814,7 +858,7 @@ def unknowns(r, gate):
         items = [(k, v) for k, v in wi.items() if k != "Base case"]
         items.sort(key=lambda kv_: -abs((kv_[1].get("dcf") or 0) - (base.get("dcf") or 0)))
         wrows = [[md(k), nok(v.get("dcf"), 1), nok(v.get("dcf", 0) - base.get("dcf", 0), 1), nok(v.get("tp")), _tag(v.get("rating", ""), _rating_cls(v.get("rating", "")))]
-                 for k, v in items[:12]]
+                 for k, v in items]
         parts.append(exhibit(f"The assumptions that carry most – one change at a time from the base case (DCF {nok(base.get('dcf'), 1)}, TP {nok(base.get('tp'))} {esc(base.get('rating', ''))})",
                              table(["Change", "DCF value", "vs base", "Target", "Rating"], wrows, cls="num wrap", widths=["52%", "12%", "12%", "12%", "12%"], left=(4,)),
                              f"Case model, whatif_runs.py ({wpath.split(chr(92))[-1].split('/')[-1]})", _src_date(r)))
@@ -822,6 +866,15 @@ def unknowns(r, gate):
     else:
         parts.append(placeholder("What-if runs not found", "run model_builder/whatif_runs.py (Windows, Excel) – the table ranks the assumptions by their effect on value"))
         flips = []
+    try:
+        res, _a = r.audit()
+        jrows = [[esc(x.id), esc(x.name), esc(x.detail), esc(x.reason or "–")] for x in res if x.status in (_a.JUSTIFIED, _a.WARN, _a.MISSING, _a.FLAG, _a.FAIL)]
+        if jrows:
+            parts.append(exhibit("The judgements on the record – audit items that are not a plain pass, and the answer given",
+                                 table(["#", "Failure mode", "What the audit saw", "The case's answer"], jrows, cls="num wrap", widths=["5%", "18%", "40%", "37%"], left=(1, 2, 3)),
+                                 "model_builder/audit.py on this workbook; reasons from META['reasons']", fmt_date(r.today)))
+    except Exception:  # noqa: BLE001
+        pass
     # what would flip the conclusion
     st, spath = r.stress()
     srows = []
@@ -869,6 +922,10 @@ def disclosures(r, gate):
     ck = r.checks()
     crows = [[str(c["n"]), esc(c["check"]), esc(c["type"]), _tag(str(c["status"]), {"OK": "ok", "WARNING": "watch", "ERROR": "broken"}.get(str(c["status"]), "na"))] for c in ck]
     parts.append(exhibit(f"Workbook integrity checks – {esc(r.master())}", table(["#", "Check", "Type", "Status"], crows, cls="num wrap", widths=["5%", "70%", "12%", "13%"], left=(1, 2)), "Case model (Checks sheet)", _src_date(r)))
+    srcs = r.rep.get("sources")
+    if srcs:
+        parts.append(exhibit("Sources used in this report", table(["Source", "Used for", "Date"], [[md(a), md(b), esc(c)] for a, b, c in srcs], cls="num wrap",
+                                                                      widths=["38%", "44%", "18%"], left=(1, 2)), "This report", fmt_date(r.today)))
     gl = [("EBITDA after leases (EBITDAaL)", "EBITDA less the lease payments of the period – the pre-IFRS 16 operating cash margin the valuation is built on."),
           ("EBIT adj.", "EBITDA after leases less depreciation of owned assets; excludes special items. The margin the reverse DCF solves for."),
           ("FCFF", "NOPAT + D&A − capex − change in working capital, after lease payments; discounted at the WACC."),

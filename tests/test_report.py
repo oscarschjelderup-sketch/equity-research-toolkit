@@ -49,7 +49,7 @@ def test_sats_report_builds_and_stores_estimates(tmp_path):
     html, out = build(tmp_path, "sats_data", SATS_XLSX, "model_map_sats.json", "2026-11-02")
     assert "SATS ASA" in html and "id='valuation'" in html
     est = json.loads(next(tmp_path.glob("estimates_2026-11-02.json")).read_text(encoding="utf-8"))
-    assert est["rating"] == "BUY" and est["tp"] == 54 and len(est["rows"]["eps"]) == 8
+    assert est["rating"] == "BUY" and est["tp"] == 58 and len(est["rows"]["eps"]) == 8
     assert "First report" in html
     # a later build sees the stored estimates and renders the revisions table
     html2, _ = build(tmp_path, "sats_data", SATS_XLSX, "model_map_sats.json", "2026-12-01")

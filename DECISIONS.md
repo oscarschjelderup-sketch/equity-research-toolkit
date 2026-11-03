@@ -139,3 +139,24 @@ the research book stay out of public repositories.
   real company; SATS is filled in phase 3.
 - **Outputs:** `examples/<TICKER>/report/` holds the PDF, `prices.json`, `estimates_<date>.json`, `gate.json`; the HTML
   is git-ignored (regenerated). Private cases pass `--out-dir` to an ignored folder.
+
+## 2026-11-02 – Report generator, phase 3: SATS after the Q3 2026 report
+
+- **Second edition of the SATS case, two drivers touched.** Norway price/mix 2026E 7.5 % (5.5 %) and fixed-cost inflation
+  2026E 1.0 % (1.5 %), both to the nine-month run-rate of the Q3 report; nothing else in the forecast, the scenarios, the
+  WACC or the terminal value changes. The lower 2026 cost base carries through the forecast (final-year EBIT margin 15.9 %
+  against 15.1 %), which is what a fixed cost base does; the target moves from 54 to 58 and the rating stays BUY.
+- **Price = last close before the model date (30 Oct 2026), not an intraday quote;** `fetch_prices` drops today's row.
+- **Consensus from the company's own page.** SATS publishes a Modular Finance consensus (revenue, EBITDA, EBITDA before
+  IFRS 16, net profit, members; seven contributors). It is public, so it is used for the annual and Q4 2026E lines; EPS
+  comes from Yahoo (five analysts) because the company page has none. Both sources are named in the exhibit.
+- **The quarterly store is eight quarters deep** (Q4 2024–Q3 2026), from the comparative columns of the four last
+  reports, with country revenue, country EBITDA before IFRS 16, clubs, members and ARPM. Older quarters are a collection task.
+- **Shareholders not collected:** the company page builds its table in the browser and the annual-report list was not
+  retrieved; the report says so instead of copying a third-party snapshot of unknown date.
+- **Page count:** the SATS report is 25 pages with the content the brief lists, at a type size readers of broker research
+  are used to (10pt body). The 25–40 range of the brief assumes the self-collected pages (price tracker, multi-year KPI
+  series, city competition) that the DNB note has and this edition does not; they are listed in the comparison document
+  as the next edition's work, not padded.
+- **The research-book row stays the author's.** The build writes a proposed row to the private case folder
+  (`~/osloquant-home/cases/proposals/`) and never to `judgements.jsonl`.

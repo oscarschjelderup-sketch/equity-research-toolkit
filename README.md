@@ -25,12 +25,12 @@ where every assumption is visible, sourced and stress-tested.
 
 ## The SATS ASA case
 
-| As of 6 October 2026, share price NOK 39.75 | |
+| As of 30 October 2026 (close), share price NOK 43.95 – second edition after the Q3 2026 report | |
 |---|---|
-| Recommendation | **BUY**, 12-month target price **NOK 54** (+36%, 39% total return) |
-| DCF value per share / blended fair value | NOK 50.7 / NOK 50.5 (70% DCF, 30% peer multiples) |
-| Bear / base / bull (DCF) | NOK 28 / 51 / 74, probability-weighted 51 |
-| What the share price implies | an EBIT margin (pre-IFRS 16) of 12.3% in 2033 – we model 15.1%, SATS earned 11.7% in 2025 |
+| Recommendation | **BUY**, 12-month target price **NOK 58** (+32%, 36% total return); first edition 6 Oct 2026: NOK 54 at a price of 39.75 |
+| DCF value per share / blended fair value | NOK 54.4 / NOK 54.1 (70% DCF, 30% peer multiples) |
+| Bear / base / bull (DCF) | NOK 31 / 54 / 78, probability-weighted 54 |
+| What the share price implies | an EBIT margin (pre-IFRS 16) of 13.3% in 2033 – we model 15.9%, SATS earned 11.7% in 2025 and 13.6% in the twelve months to Q3 2026 |
 | WACC / terminal growth | 9.1% / 2.0%, terminal value 66% of EV |
 
 The thesis is operating leverage: about 70% of personnel costs and 60% of other operating costs are fixed per club and
@@ -66,6 +66,11 @@ carries a source and a date; estimates are marked EST; data we do not have says 
 |---|---|
 
 *The fictional Example Company – every section filled with invented, labelled data (`deck_builder/example_deck.py`).*
+
+The SATS edition of 2 November 2026 (after the Q3 2026 report) is in [`examples/SATS/report`](examples/SATS/report) – 25 pages built through the full gate; `docs/rapport/sats-sammenligning.md` compares it page by page with a full-length broker note.
+
+| ![SATS report front page](docs/img/sats_report_p01.png) | ![SATS investment case](docs/img/sats_report_p02.png) |
+|---|---|
 
 ## The workbook
 
