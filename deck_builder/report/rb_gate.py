@@ -5,6 +5,7 @@ Four checks, in order (after a refusal of any SCAFFOLD module written by new_cas
   2. `verify_dcf.py` reproduces the Excel DCF in Python and every reverse-DCF round trip returns the share price;
   3. the case audit (ANALYSE.md section 4) has no FAIL or FLAG and the case gate (reverse DCF, ≥ 10 % vs price) passes;
   4. `stress_test.py` (Excel, Windows) shows no ERROR on any switch; skipped with --skip-stress, which the report states.
+Plus one line that flags but never fails: the model's revenue growth against the Base Rate Book (rb_baserate.py).
 """
 from __future__ import annotations
 
@@ -113,6 +114,11 @@ def evaluate(rep, skip_stress=False, skip_verify=False) -> dict:
     items.append(dict(name="Case gate (reverse DCF)", ok=ok, detail="; ".join(problems) if problems else
                       f"margin gap {(d['m_ours'] - d['m_implied']) * 100:+.1f}pp, growth gap {(d['g_ours'] - d['g_implied']) * 100:+.1f}pp, "
                       f"DCF {d['dcf'] / d['price'] - 1:+.0%} vs price"))
+    if str(Path(__file__).parent) not in sys.path:                # imported from elsewhere (tests): the sibling module still resolves
+        sys.path.insert(0, str(Path(__file__).parent))
+    import rb_baserate
+
+    items.append(rb_baserate.gate_item(rep))                      # a flag, never a failure (the case may be the exception)
     if skip_stress:
         items.append(dict(name="stress_test.py", ok=None, detail="skipped (--skip-stress)", results=[]))
     else:
@@ -125,6 +131,6 @@ def evaluate(rep, skip_stress=False, skip_verify=False) -> dict:
 def render_text(result: dict) -> str:
     lines = ["BUILD GATE " + ("PASSED" if result["ok"] else "FAILED")]
     for i in result["items"]:
-        st = {True: "ok  ", False: "FAIL", None: "skip"}[i["ok"]]
+        st = "flag" if i.get("flag") else {True: "ok  ", False: "FAIL", None: "skip"}[i["ok"]]
         lines.append(f"  [{st}] {i['name']}: {i['detail']}")
     return "\n".join(lines)

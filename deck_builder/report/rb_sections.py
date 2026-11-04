@@ -863,6 +863,23 @@ def unknowns(r, gate):
     rows = [[md(a), _tag(b, {"Have": "ok", "Collected": "ok"}.get(b, "watch" if b.lower().startswith("not") else "na")), md(c)] for a, b, c in dm]
     parts.append(exhibit("Data map – what this report could not use", table(["Input", "Status", "Source we lack / what we did instead"], rows, cls="num wrap",
                                                                             widths=["36%", "12%", "52%"], left=(1, 2)), "This report", fmt_date(r.today)))
+    # base rates: how often companies have delivered the model's growth (Mauboussin)
+    import rb_baserate
+
+    try:
+        br = rb_baserate.check(r.estimates())
+    except Exception:  # noqa: BLE001 – the exhibit is optional; the gate line says why it is missing
+        br = None
+    if br:
+        brow = [[md(f"Revenue growth a year, {br['from']}–{br['to']}E"), pct(br["rev_cagr"], 1), pct(br["real"], 1),
+                 _tag(f"{br['share'] * 100:.0f} %", "watch" if br["flag"] else "ok"), md(br["sample"])]]
+        if br.get("m_from") is not None:
+            brow.append([md(f"EBITDA margin, {br['from']}E → {br['to']}E"), f"{pct(br['m_from'], 1)} → {pct(br['m_to'], 1)}", "–",
+                         _tag("no distribution", "na"), md("margins persist: r = 0.79 over three years (p. 59)")])
+        parts.append(exhibit("Base rates – how often companies have delivered the model's estimates" + (" (outside the 80th percentile: the case must say why)" if br["flag"] else ""),
+                             table(["Estimate", "Model (nominal)", "Real (less 2 % inflation, EST)", "Companies that did at least as much", "Reference class"], brow,
+                                   cls="num wrap", widths=["30%", "16%", "16%", "16%", "22%"], left=(4,)),
+                             br["source"], fmt_date(r.today)))
     # assumptions that carry most
     wi, wpath = r.whatif()
     if wi:

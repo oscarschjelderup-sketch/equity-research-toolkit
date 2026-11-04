@@ -250,3 +250,19 @@ with the sector checklist from `docs/rapport/skalering.md` pasted in as question
 
 Tested on a fictional export (`tests/fixtures/XSC.statements.json`): the module imports beside the template, balances,
 and `build_model.py` builds a workbook from it. Dekning 2026-11-03, part 3 (the dashboard side is oslo-quant D38-D40).
+
+## 2026-11-05 – Base rates in the report (the night of the head of analysis, oslo-quant D47)
+
+An estimate is an inside view; the outside view asks how often companies have done it (Kahneman and Lovallo 1993;
+Mauboussin, Callahan and Majd, *The Base Rate Book*, Credit Suisse 2016). `deck_builder/report/rb_baserate.py` looks
+the model's revenue growth a year over the first three estimate years up in the book's distribution of three-year
+sales growth (Exhibit 2, p. 22: the top 1,000 global companies 1950–2015, real 2015 dollars, 53,266 observations),
+after deflating the nominal forecast by 2 % (Norges Bank's target, EST) – the book warns that its figures are real
+(p. 26). The table is `deck_builder/report/base_rates.yaml`, transcribed with source and page; the book's size-class
+column for $325–700m is not used (its shares are divided by the wrong total). The report prints the share of
+companies that grew at least as fast in "What we do not know", with the EBITDA margin path beside the book's
+persistence figure (r = 0.79 over three years, p. 59; the book has no distribution of margin changes). Below 20 %
+the exhibit says the case must explain why, and the build gate marks the line `[flag]` – a flag, never a failure:
+the case may be the exception, and the report is where it says so. SATS (2 Nov estimates): +5.7 % a year, real
++3.6 %, 59 % of companies did at least as much – no flag. The dashboard runs the same check against the Oslo Børs
+store as a second reference class (oslo-quant D47).
